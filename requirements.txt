@@ -78,7 +78,7 @@ requests==2.34.2
     # via -r requirements.in
 six==1.17.0
     # via python-dateutil
-sqlalchemy==2.0.52
+sqlalchemy==2.1.3
     # via
     #   -r requirements.in
     #   flask-sqlalchemy
