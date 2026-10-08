@@ -306,6 +306,9 @@ section[id^="view-"]{animation:rise .35s cubic-bezier(.2,.7,.2,1)}
 .recurOpts{display:none;margin-top:8px;padding:12px 14px;background:var(--surface2);border:1px solid var(--line);border-radius:14px}
 .recurOpts.on{display:block}
 .recurInputs{display:grid;grid-template-columns:76px 1fr;gap:10px;margin-top:8px}
+.dayRow{display:flex;gap:6px;margin-top:8px}
+.dayRow button{flex:1;min-width:0;padding:8px 0;border-radius:10px;font-size:12px;font-weight:600;color:var(--muted)}
+.dayRow button.on{color:var(--text);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
 
 /* ---- settings accordion ---- */
 #modalBox.settings{width:min(580px,100%);display:flex;flex-direction:column;max-height:90vh;padding:0}
@@ -594,7 +597,18 @@ input.scrRename{font-size:12px;padding:1px 5px;width:120px;min-width:0}
                 <option value="hours">Hours</option><option value="days" selected>Days</option>
                 <option value="weeks">Weeks</option><option value="months">Months</option>
               </select>
-            </div></div></div>
+            </div>
+            <div id="remDaysWrap" style="margin-top:12px">
+              <span class="small muted">On these days</span>
+              <div class="dayRow" id="remDays">
+                <button type="button" data-day="0" title="Monday">M</button>
+                <button type="button" data-day="1" title="Tuesday">T</button>
+                <button type="button" data-day="2" title="Wednesday">W</button>
+                <button type="button" data-day="3" title="Thursday">T</button>
+                <button type="button" data-day="4" title="Friday">F</button>
+                <button type="button" data-day="5" title="Saturday">S</button>
+                <button type="button" data-day="6" title="Sunday">S</button>
+              </div></div></div></div>
         <div class="mActions" style="justify-content:flex-start">
           <button class="primary" id="remSave">Schedule</button>
           <button class="ghost" id="remReset" style="display:none">Cancel edit</button>
@@ -1930,6 +1944,26 @@ async function loadReminders(){
 }
 function ntfyConfigured(){ return !!(S.settings.ntfyTopic||"").trim(); }
 
+/* Weekday picker for repeating reminders. Days are 0=Mon .. 6=Sun (matching the
+   server); null/empty means every day. Only hourly/daily repeats take one. */
+const REM_DAY_NAMES = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const remDayBtns = () => document.querySelectorAll("#remDays button");
+function remDaysSet(days){
+  const on = days && days.length ? days : [0,1,2,3,4,5,6];
+  remDayBtns().forEach(b=>{
+    const isOn = on.includes(+b.dataset.day);
+    b.classList.toggle("on", isOn); b.setAttribute("aria-pressed", isOn);
+  });
+}
+const remDaysGet = () => [...remDayBtns()].filter(b=>b.classList.contains("on")).map(b=>+b.dataset.day);
+const remDaysApply = () => ["hours","days"].includes($("#remIntType").value);
+function remDaysSync(){ $("#remDaysWrap").style.display = remDaysApply() ? "" : "none"; }
+function fmtDays(days){
+  if(!days || !days.length) return "";
+  const k = days.join();
+  return k==="0,1,2,3,4" ? "weekdays" : k==="5,6" ? "weekends" : days.map(d=>REM_DAY_NAMES[d]||"").join(", ");
+}
+
 function setTagPreview(tag){
   $("#remTagPreview").textContent = NTFY_TAG_EMOJI[tag] || "🔔";
   document.querySelectorAll("#quickTagRow button").forEach(b=>b.classList.toggle("on", b.dataset.tag===tag));
@@ -1943,6 +1977,7 @@ function remFormReset(){
   $("#remTag").value = ""; $("#remTagWarn").style.display = "none"; setTagPreview("");
   $("#remRecur").checked = false; $("#remRecurOpts").classList.remove("on"); $("#remRecurRow").classList.remove("on");
   $("#remIntVal").value = 1; $("#remIntType").value = "days";
+  remDaysSet(null); remDaysSync();
   const d = new Date(Date.now() + 60*60*1000);
   $("#remDate").value = isoOf(d);
   $("#remTime").value = String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
@@ -1963,6 +1998,7 @@ function remLoadInto(r){
   $("#remRecur").checked = !!r.recurring;
   $("#remRecurOpts").classList.toggle("on", !!r.recurring); $("#remRecurRow").classList.toggle("on", !!r.recurring);
   if(r.recurring){ $("#remIntVal").value = r.interval_value||1; $("#remIntType").value = r.interval_type||"days"; }
+  remDaysSet(r.days); remDaysSync();
   renderRemList();
   $("#view-notif").scrollIntoView({behavior:"smooth", block:"start"});
 }
@@ -2002,7 +2038,7 @@ function renderRemList(){
         <div class="rMeta">
           <span class="${r.next_fire<=now?"rDue":""}">${esc(fmtWhen(r.next_fire))}</span>
           <span>P${esc(String(r.priority))} ${esc(PRIO_LABEL[r.priority]||"")}</span>
-          ${r.recurring?`<span>🔁 ${esc(fmtInterval(r.interval_type, r.interval_value))}</span>`:"<span>one-off</span>"}
+          ${r.recurring?`<span>🔁 ${esc(fmtInterval(r.interval_type, r.interval_value))}${r.days&&r.days.length?esc(" · "+fmtDays(r.days)):""}</span>`:"<span>one-off</span>"}
         </div></div>
       <div class="rActs"><button data-edit class="ghost small" title="Edit">&#9998;</button>
         <button data-del class="ghost small danger" title="Delete">✕</button></div>`;
@@ -2027,6 +2063,11 @@ $("#remRecur").onchange = e => {
   $("#remRecurOpts").classList.toggle("on", e.target.checked);
   $("#remRecurRow").classList.toggle("on", e.target.checked);
 };
+$("#remIntType").onchange = remDaysSync;
+remDayBtns().forEach(b => b.onclick = () => {
+  const on = !b.classList.contains("on");
+  b.classList.toggle("on", on); b.setAttribute("aria-pressed", on);
+});
 $("#remReset").onclick = () => { remFormReset(); renderRemList(); };
 
 // Paste/type a single emoji -> auto-converts to its ntfy shortcode. If more
@@ -2082,17 +2123,27 @@ $("#remSave").onclick = async () => {
   // A past time on a recurring reminder is fine (the dispatcher rolls it
   // forward to the next occurrence); on a one-off it would just fire instantly.
   if(!recurring && when.getTime() < Date.now()-60000){ remStatus("That time is in the past", true); return; }
+  const picked = remDaysGet();
+  const filtered = recurring && remDaysApply();
+  if(filtered && !picked.length){ remStatus("Pick at least one day", true); return; }
+  // All seven picked = no filter. The browser's timezone rides along because
+  // "which weekday is it" is the user's answer, not the server's.
+  const useDays = filtered && picked.length < 7;
   const payload = { message: msg, priority: +$("#remPrio").value,
     tag: $("#remTag").value.trim() || "alarm_clock",
     next_fire: Math.floor(when.getTime()/1000), recurring,
     interval_type: recurring ? $("#remIntType").value : null,
-    interval_value: recurring ? +$("#remIntVal").value : null };
+    interval_value: recurring ? +$("#remIntVal").value : null,
+    days: useDays ? picked : null,
+    tz: useDays ? Intl.DateTimeFormat().resolvedOptions().timeZone : null };
   const url = remEditing ? "/api/reminders/"+remEditing : "/api/reminders";
   const r = await fetch(url, {method: remEditing?"PUT":"POST",
     headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload)});
   const j = await r.json().catch(()=>({}));
   if(!r.ok){ remStatus(j.error || "Save failed", true); return; }
-  remStatus(remEditing ? "Saved ✓" : "Scheduled ✓");
+  // The server moves a first fire that lands on an unticked day; say so.
+  const moved = j.next_fire !== payload.next_fire ? ` - first fire ${fmtWhen(j.next_fire)}` : "";
+  remStatus((remEditing ? "Saved ✓" : "Scheduled ✓") + moved);
   remFormReset(); await loadReminders(); renderNotif();
 };
 

@@ -28,6 +28,7 @@ _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _KEY = re.compile(r"^[A-Za-z0-9_.-]{1,64}$")
 _ISO = re.compile(r"^\d{4}-\d{2}-\d{2}T[\d:.]+(Z|[+-]\d{2}:\d{2})?$")
 _TAG = re.compile(r"^[A-Za-z0-9_+-]{1,64}$")
+_TZ = re.compile(r"^[A-Za-z0-9_+-]+(/[A-Za-z0-9_+-]+){0,2}$")   # IANA name; looked up (and ignored if unknown) at dispatch
 _WORD = re.compile(r"^[a-z0-9_-]{1,24}$")
 _COLOR = re.compile(r"^#[0-9a-fA-F]{3,8}$")
 
@@ -319,10 +320,19 @@ def clean_reminder(r):
             return None
     else:
         itype = None
+    days, tz = None, None
+    if recurring and itype in ("hours", "days") and isinstance(r.get("days"), list):
+        # 0=Mon .. 6=Sun. Anything unusable, or all seven, means "every day".
+        picked = sorted({d for d in r["days"] if type(d) is int and 0 <= d <= 6})
+        days = picked if 0 < len(picked) < 7 else None
+    if days:
+        tz = _str(r.get("tz"), "", 64)
+        tz = tz if _TZ.match(tz) else None
     tag = _str(r.get("tag"), "").strip()[:60]
     return {"id": _key(r.get("id")) or uuid.uuid4().hex, "message": msg, "priority": priority,
             "tag": tag if _TAG.match(tag) else "alarm_clock", "next_fire": next_fire,
             "recurring": recurring, "interval_type": itype, "interval_value": ivalue,
+            "days": days, "tz": tz,
             "created": _int(r.get("created"), 0, 0, 10 ** 11)}
 
 

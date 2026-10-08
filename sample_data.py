@@ -181,10 +181,10 @@ def build():
         "reminders": [
             {"id": "r1", "message": "Stand-up prep - check overnight alerts", "priority": 3, "tag": "alarm_clock",
              "next_fire": int(time.time()) + 3600, "recurring": True, "interval_type": "days", "interval_value": 1,
-             "created": int(time.time())},
+             "days": None, "tz": None, "created": int(time.time())},
             {"id": "r2", "message": "Submit weekly timesheet", "priority": 3, "tag": "white_check_mark",
              "next_fire": int(time.time()) + 6 * 3600, "recurring": False,
-             "interval_type": None, "interval_value": None, "created": int(time.time())},
+             "interval_type": None, "interval_value": None, "days": None, "tz": None, "created": int(time.time())},
         ],
         "activeTimer": None,
         "calSeen": {},

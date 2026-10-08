@@ -493,3 +493,16 @@ Includes everything in 2.7.0.
   as `docs/screenshot-classic.png`.
 - **FEATURE:** The image workflow also publishes a floating `:3` tag.
 - **FEATURE:** Aurora is now the default theme for new accounts (and the login page). Dark is redone as a true-black, monochrome "ink" theme with a silver accent and almost no ambient light, so it no longer resembles the tinted themes. Existing accounts keep their saved theme. Screenshots and demo are re-recorded with Aurora; `docs/screenshot-aurora.png` is replaced by `docs/screenshot-dark.png`.
+
+## Weekday picker for repeating reminders
+
+- **FEATURE:** Hourly and daily repeating reminders get an M T W T F S S row
+  of toggle buttons (Notifications tab), so a daily reminder can run on
+  workdays only, or weekends only. Excluded days are skipped without
+  shifting the schedule; a first fire that lands on an excluded day moves to
+  the next allowed one. The list shows it as e.g. "every 1 day · weekdays".
+- **FEATURE:** Weekdays are evaluated in the saving browser's timezone,
+  stored with the reminder as `tz`, rather than the server's - a container
+  running in UTC would otherwise put early-morning reminders on the wrong
+  day. Reminders saved before this change have no `days`/`tz` and behave
+  exactly as before; the export format gains the two optional fields.

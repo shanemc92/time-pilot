@@ -78,6 +78,24 @@ class Injection(unittest.TestCase):
         self.assertIsNone(S.clean_reminder(dict(good, recurring=True, interval_type="fortnights")))
         self.assertIsNone(S.clean_reminder(dict(good, message="x" * 501)))
 
+    def test_reminder_weekday_filter(self):
+        rep = {"message": "m", "next_fire": 1, "recurring": True, "interval_type": "days", "interval_value": 1}
+        clean = S.clean_reminder
+        self.assertEqual(clean(dict(rep, days=[4, 0, 0, 3]))["days"], [0, 3, 4])
+        self.assertEqual(clean(dict(rep, days=[0, 1, 2, 3, 4, 5, 6]))["days"], None)   # all seven = every day
+        self.assertEqual(clean(dict(rep, days=[7, -1, "1", True, 1.0]))["days"], None)  # nothing usable
+        self.assertEqual(clean(dict(rep, days=PAYLOAD))["days"], None)
+        self.assertEqual(clean(dict(rep, days=[]))["days"], None)
+        # Only hourly/daily repeats carry one, and a one-off never does.
+        self.assertEqual(clean(dict(rep, interval_type="weeks", days=[1]))["days"], None)
+        self.assertEqual(clean(dict(rep, interval_type="hours", days=[1]))["days"], [1])
+        self.assertEqual(clean(dict(rep, recurring=False, days=[1]))["days"], None)
+        # tz only travels with a filter, and only as a plain zone name.
+        self.assertEqual(clean(dict(rep, days=[1], tz="Europe/Dublin"))["tz"], "Europe/Dublin")
+        self.assertIsNone(clean(dict(rep, days=[1], tz=PAYLOAD))["tz"])
+        self.assertIsNone(clean(dict(rep, days=[1], tz="../etc/passwd"))["tz"])
+        self.assertIsNone(clean(dict(rep, tz="Europe/Dublin"))["tz"])
+
     def test_active_timer_needs_a_real_start(self):
         self.assertIsNone(S.clean_active_timer({"label": "x", "start": PAYLOAD}))
         self.assertIsNone(S.clean_active_timer("nope"))

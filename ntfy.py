@@ -21,6 +21,7 @@ import threading
 import time
 from datetime import datetime
 from urllib.parse import urlparse, quote
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import requests
 
@@ -34,6 +35,7 @@ logger = logging.getLogger("timepilot")
 ALLOW_PRIVATE = os.environ.get("TIMEPILOT_ALLOW_PRIVATE_NTFY", "").lower() in ("1", "true", "yes")
 
 DISPATCH_INTERVAL = 30      # seconds between due-reminder scans
+_MAX_DAY_SKIPS = 500        # > the 168 hourly steps in a week, so any satisfiable filter resolves
 _ADVISORY_LOCK_KEY = 0x7C1D_9E27   # arbitrary, app-specific
 
 
@@ -111,8 +113,16 @@ def _header_safe(v):
     return " ".join(v.split())[:250]   # collapse the double space the dropped emoji leaves behind
 
 
-def advance_time(ts, interval_type, interval_value):
-    """Next fire timestamp after advancing by one interval."""
+def zone(name):
+    """The ZoneInfo for an IANA name, or None (-> the server's local zone)."""
+    try:
+        return ZoneInfo(name) if name else None
+    except (ZoneInfoNotFoundError, ValueError, OSError):
+        return None
+
+
+def _step(ts, interval_type, interval_value):
+    """One interval after ts, ignoring any weekday filter."""
     dt = datetime.fromtimestamp(ts)
     if interval_type == "hours":
         return ts + interval_value * 3600
@@ -129,6 +139,33 @@ def advance_time(ts, interval_type, interval_value):
         # the same hour across a DST boundary rather than drifting by an hour.
         return int(dt.replace(year=year, month=month, day=day).timestamp())
     return ts + 86400
+
+
+def first_allowed(ts, interval_type, interval_value, days, tz=None):
+    """ts itself if it falls on one of `days` (0=Mon .. 6=Sun, read in `tz`),
+    else the first later occurrence of the schedule that does. The schedule
+    keeps its own rhythm and the excluded days are just masked out of it, so
+    "every 3 hours, weekdays" resumes Monday on the same 3-hour grid.
+
+    None if the interval never lands on a selected day (e.g. every 7 days
+    from a Monday, Tuesdays only). Callers reject that when a reminder is
+    saved; the cap just keeps the dispatcher from ever spinning on it.
+    """
+    if not days:
+        return ts
+    for _ in range(_MAX_DAY_SKIPS):
+        if datetime.fromtimestamp(ts, tz).weekday() in days:
+            return ts
+        ts = _step(ts, interval_type, interval_value)
+    return None
+
+
+def advance_time(ts, interval_type, interval_value, days=None, tz=None):
+    """Next fire timestamp after advancing by one interval, skipping any
+    occurrence that lands on a day outside `days`."""
+    nxt = _step(ts, interval_type, interval_value)
+    allowed = first_allowed(nxt, interval_type, interval_value, days, tz)
+    return nxt if allowed is None else allowed
 
 
 def dispatch_for_user(settings, reminders, now=None):
@@ -151,11 +188,12 @@ def dispatch_for_user(settings, reminders, now=None):
         else:
             logger.warning("ntfy send failed for reminder %s: %s", r.get("id"), reason)
         if r.get("recurring") and r.get("interval_type") and r.get("interval_value"):
-            nxt = advance_time(int(r["next_fire"]), r["interval_type"], int(r["interval_value"]))
+            step = (r["interval_type"], int(r["interval_value"]), r.get("days"), zone(r.get("tz")))
+            nxt = advance_time(int(r["next_fire"]), *step)
             # Catch up past any occurrences missed while the app was down,
             # rather than firing one notification per missed occurrence.
             while nxt <= now:
-                nxt = advance_time(nxt, r["interval_type"], int(r["interval_value"]))
+                nxt = advance_time(nxt, *step)
             r["next_fire"] = nxt
             kept.append(r)
         # one-time reminders are simply not kept

@@ -255,6 +255,16 @@ nothing open - it replaces the cron job you'd otherwise wire up. Recurring
 reminders that were missed while the app was down roll forward to their next
 occurrence rather than firing once per occurrence missed.
 
+Hourly and daily repeats also have a row of **M T W T F S S** buttons, so a
+daily reminder can run on workdays only, or weekends only. The excluded days
+are skipped but the schedule keeps its rhythm (every 3 hours on weekdays
+resumes Monday on the same 3-hour grid). If the first fire you pick lands on a
+day you've switched off, it moves to the next day that's on. Weekdays are
+worked out in the timezone of the browser that saved the reminder, not the
+server's, so a reminder at 00:30 doesn't slip to the wrong day when the server
+runs in UTC. Weekly and monthly repeats don't show the buttons: they already
+land on one fixed day.
+
 The **"Push task & meeting reminders to ntfy"** toggle mirrors the existing
 slotted-task and meeting pop-ups out to ntfy as they fire. Those are driven
 by the browser, so they only happen while a tab is open somewhere - if you

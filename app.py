@@ -494,6 +494,29 @@ def create_app():
                 return None, "interval_value must be at least 1"
         else:
             itype, ivalue = None, None
+        # Weekday filter (0=Mon .. 6=Sun). Only hourly/daily repeats take one:
+        # weekly and monthly repeats already land on a single fixed day.
+        # None means every day, which is also what all seven collapse to.
+        days, tz = None, None
+        if recurring and itype in ("hours", "days"):
+            days = d.get("days", base.get("days"))
+            if days is not None:
+                if not (isinstance(days, list) and days
+                        and all(type(x) is int and 0 <= x <= 6 for x in days)):
+                    return None, "days must be a list of weekdays, 0 (Mon) to 6 (Sun)"
+                days = sorted(set(days))
+                if len(days) == 7:
+                    days = None
+        if days:
+            # Weekdays are the browser's, not the server's: a container in UTC
+            # would otherwise put a 00:30 reminder on the previous day.
+            tz = d.get("tz", base.get("tz"))
+            tz = tz if isinstance(tz, str) and ntfy_mod.zone(tz) else None
+            # A first fire on an excluded day moves to the next allowed one.
+            first = ntfy_mod.first_allowed(next_fire, itype, ivalue, days, ntfy_mod.zone(tz))
+            if first is None:
+                return None, "That repeat interval never lands on the selected days"
+            next_fire = first
         tag = (d.get("tag") or base.get("tag") or "alarm_clock").strip()[:60]
         return {
             "id": base.get("id") or uuid.uuid4().hex,
@@ -504,6 +527,8 @@ def create_app():
             "recurring": recurring,
             "interval_type": itype,
             "interval_value": ivalue,
+            "days": days,
+            "tz": tz,
             "created": base.get("created") or int(time.time()),
         }, None
 
