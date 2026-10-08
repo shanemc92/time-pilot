@@ -1,0 +1,65 @@
+name: smoke
+
+# Builds the real image and runs it against Postgres. The unit tests can't see
+# problems that only show up in the shipped image - a dependency bump that
+# changes the database driver, a wheel missing for the base image's Python, a
+# crash at import - so this runs on every PR (Dependabot's included) and every
+# push to main, before anything is published.
+on:
+  pull_request:
+    paths-ignore: ["**.md", "docs/**"]
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "docs/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: {POSTGRES_USER: timepilot, POSTGRES_PASSWORD: ci-only, POSTGRES_DB: timepilot}
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U timepilot" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build the image from the Dockerfile
+        run: docker build -t tp-test .
+
+      - name: Interpreter and key package versions in the image
+        run: |
+          docker run --rm --entrypoint python tp-test -c "import sys; from importlib.metadata import version as v; print(sys.version); print({p: v(p) for p in ['sqlalchemy','psycopg2-binary','cryptography','werkzeug','gunicorn','greenlet','flask']})"
+
+      # tests/ is in .dockerignore, so it is mounted rather than baked in.
+      - name: Unit tests inside the image
+        run: docker run --rm -v "$PWD/tests:/app/tests:ro" --entrypoint python tp-test -m unittest discover -s tests -v
+
+      - name: Start the app on Postgres and seed the demo user
+        run: |
+          KEY=$(python3 -c "import base64,os;print(base64.b64encode(os.urandom(32)).decode())")
+          docker run -d --name tp --network host \
+            -e DATABASE_URL=postgresql://timepilot:ci-only@127.0.0.1:5432/timepilot \
+            -e FLASK_SECRET_KEY=ci-only-secret -e TIMEPILOT_MASTER_KEY="$KEY" \
+            -e SESSION_COOKIE_SECURE=false -e TIMEPILOT_ALLOW_PRIVATE_NTFY=true tp-test
+          for i in $(seq 1 30); do curl -fs http://127.0.0.1:5170/healthz && break; sleep 2; done
+          docker exec tp python sample_data.py --force --no-ics
+
+      - name: Smoke test (login, state, import/export, reminders, live dispatcher)
+        run: pip install -q requests && python tests/ci_smoke.py
+
+      - name: App logs (a traceback anywhere fails the job)
+        if: always()
+        run: |
+          docker logs tp 2>&1 | tail -80
+          if docker logs tp 2>&1 | grep -q Traceback; then echo "::error::traceback in the app logs"; exit 1; fi
