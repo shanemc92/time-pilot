@@ -9,7 +9,7 @@ updates:
     open-pull-requests-limit: 5
     labels: [dependencies]
 
-  # python:3.12-slim in the Dockerfile - picks up new patch/minor tags
+  # python:3.14-slim in the Dockerfile - picks up new patch/minor tags
   - package-ecosystem: docker
     directory: /
     schedule:

@@ -9,7 +9,7 @@ on:
     tags: ["v*.*.*"]
   schedule:
     # Rebuilds :latest weekly even with zero code changes, so it picks up
-    # upstream python:3.12-slim OS/security patches automatically. A
+    # upstream python:3.14-slim OS/security patches automatically. A
     # Dependabot PR bumping requirements.in still gets its own build+test
     # via the push trigger above when merged.
     - cron: "17 4 * * 1"   # 04:17 UTC every Monday - arbitrary offset to
