@@ -16,9 +16,7 @@ click==8.4.2
     # via
     #   flask
     #   x-wr-timezone
-colorama==0.4.6
-    # via click
-cryptography==50.0.0
+cryptography==50.0.1
     # via -r requirements.in
 deprecated==1.3.1
     # via limits
