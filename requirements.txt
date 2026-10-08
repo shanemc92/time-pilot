@@ -41,7 +41,7 @@ greenlet==3.5.4
     #   sqlalchemy
 gunicorn==26.0.0
     # via -r requirements.in
-icalendar==7.2.2
+icalendar==7.3.0
     # via
     #   -r requirements.in
     #   recurring-ical-events
