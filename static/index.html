@@ -1811,10 +1811,18 @@ async function renderExport(){
     });
     const gaps = Math.max(0, elapsed - covered);
     const overlap = Math.max(0, summed - covered);   // time counted by more than one entry
+    const DIV = "\n-------------------";
+    // divider after the last entry, then the time summary
+    out += DIV;
     out += `\nElapsed Time: ${fmtDur(elapsed)} (${minToHM(first)}-${minToHM(last)})`;
     out += `\nTotal Time: ${fmtDur(total)}`;
     out += `\nGaps: ${fmtDur(gaps)} (${(gaps/60).toFixed(2)})`;
     out += `\nOverlap: ${fmtDur(overlap)} (${(overlap/60).toFixed(2)})`;
+    // divider, then time per category (largest first; same raw minutes as Total Time)
+    const byCat = {};
+    entries.forEach(e=>{ const k = entCat(e); byCat[k] = (byCat[k]||0) + e.minutes; });
+    out += DIV + "\nCategory breakdown:\n" + Object.entries(byCat).sort((a,b)=>b[1]-a[1])
+      .map(([k,m])=>`${ascii(catName(k))}: ${fmtDur(m)}`).join("\n");
   } else out += "No entries.";
   $("#exportText").textContent = out;
 }
