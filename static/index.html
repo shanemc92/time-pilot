@@ -1744,7 +1744,16 @@ async function importCalToLog(d){
   });
   if(changed) markDirty();
 }
+// Unsaved row edits on the export tab, keyed by entry. Any re-render (saving another row, deleting one, adding an
+// entry, changing day...) rebuilds the table from S.timelog, so pending edits are applied first instead of being lost.
+const exportPending = new Map();
+function flushExportEdits(){
+  if(!exportPending.size) return;
+  exportPending.forEach(apply => apply());
+  exportPending.clear(); markDirty();
+}
 async function renderExport(){
+  flushExportEdits();
   const d = $("#expDate").value || todayISO(); $("#expDate").value = d;
   try { await importCalToLog(d); } catch(e){ /* calendar issues shouldn't blank the table */ }
   const entries = S.timelog.filter(e=>e.date===d).sort((a,b)=>a.start.localeCompare(b.start));
@@ -1770,21 +1779,22 @@ async function renderExport(){
       <td class="rowActs"><span class="actWrap"><button class="ghost small" data-save title="Save changes" disabled>💾</button><button class="ghost small danger" data-del title="Delete">✕</button></span></td>`;
     const [lab, st, en, mi] = tr.querySelectorAll("input"), catSel = tr.querySelector("select");
     const saveBtn = tr.querySelector("[data-save]");
-    const dirtyRow = () => { saveBtn.disabled = false; tr.classList.add("rowDirty"); };
+    const apply = () => {
+      e.label = lab.value; e.category = catSel.value;
+      e.start = st.value; e.end = en.value; e.minutes = +mi.value || 1;
+    };
+    const dirtyRow = () => { saveBtn.disabled = false; tr.classList.add("rowDirty"); exportPending.set(e, apply); };
     // auto-fill minutes from start/end while typing, but DON'T re-render (no jump)
     const syncMins = () => { const diff = hmToMin(en.value) - hmToMin(st.value); if(diff > 0) mi.value = diff; };
     lab.oninput = dirtyRow; catSel.onchange = dirtyRow; mi.oninput = dirtyRow;
     st.oninput = () => { syncMins(); dirtyRow(); };
     en.oninput = () => { syncMins(); dirtyRow(); };
-    const commit = () => {
-      e.label = lab.value; e.category = catSel.value;
-      e.start = st.value; e.end = en.value; e.minutes = +mi.value || 1;
-      markDirty(); renderExport();          // re-sort + refresh totals only on Save
-    };
+    // saving applies this row AND every other pending edit (the re-render picks them all up), then re-sorts + refreshes totals
+    const commit = () => { exportPending.set(e, apply); renderExport(); };
     saveBtn.onclick = commit;
     // Enter in any field of the row saves it
     tr.querySelectorAll("input").forEach(inp => inp.addEventListener("keydown", ev => { if(ev.key==="Enter") commit(); }));
-    tr.querySelector("[data-del]").onclick = () => { S.timelog = S.timelog.filter(x=>x.id!==e.id); markDirty(); renderExport(); };
+    tr.querySelector("[data-del]").onclick = () => { exportPending.delete(e); S.timelog = S.timelog.filter(x=>x.id!==e.id); markDirty(); renderExport(); };
     tb.appendChild(tr);
   });
   const round = +S.settings.rounding || 1;
