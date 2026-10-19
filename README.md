@@ -29,8 +29,8 @@ More in [Screenshots](#screenshots).
 The two share the same backend and database schema, so you can switch
 between them at any time without migrating or exporting anything - your
 tasks, notes and settings are the same either way. (One small catch: 2.x has
-no Aurora or Bloom theme, so an account set to one falls back to Dark when
-opened in 2.x.)
+no Aurora, Bloom or Cobalt theme, so an account set to one falls back to
+Dark when opened in 2.x.)
 
 **Stay on the classic look:** pin the image in `docker-compose.yml`
 (`image: ghcr.io/shanemc92/timepilot:2`) then `docker compose pull && docker
@@ -87,8 +87,9 @@ to plain translucent surfaces with no blur; everything still works.
 - **Settings tab** - Account, Appearance (with theme previews), Hours & day,
   Reminders, Push notifications, Board & categories, Calendar and Data &
   backup, each saved as you change it.
-- **Themes** - Aurora (default), the vivid Bloom, a true-black Dark, light, HTB and
-  Dracula (Settings -> Appearance), all built on the glass look. On phones the icon rail becomes a
+- **Themes** - Aurora (default), the plum-and-pink Bloom, the deep-blue Cobalt, a
+  true-black Dark, light, HTB and Dracula (Settings -> Appearance), all built on
+  the glass look. On phones the icon rail becomes a
   bottom dock.
 - **Scratchpad** - a plain-text scratch tab for quick copy/paste, with up
   to 8 named pads open at once (double-click a pad tab to rename it): line
@@ -171,15 +172,16 @@ Any tab pinned beside any other - here Tasks next to the Planner.
 ### Themes
 
 <p>
-<img src="docs/screenshots/theme-aurora.webp" width="32%" alt="Aurora theme">
-<img src="docs/screenshots/theme-bloom.webp" width="32%" alt="Bloom theme">
-<img src="docs/screenshots/theme-dark.webp" width="32%" alt="Dark theme">
-<img src="docs/screenshots/theme-light.webp" width="32%" alt="Light theme">
-<img src="docs/screenshots/theme-hackthebox.webp" width="32%" alt="HackTheBox theme">
-<img src="docs/screenshots/theme-dracula.webp" width="32%" alt="Dracula theme">
+<img src="docs/screenshots/theme-aurora.webp" width="24%" alt="Aurora theme">
+<img src="docs/screenshots/theme-bloom.webp" width="24%" alt="Bloom theme">
+<img src="docs/screenshots/theme-cobalt.webp" width="24%" alt="Cobalt theme">
+<img src="docs/screenshots/theme-dark.webp" width="24%" alt="Dark theme">
+<img src="docs/screenshots/theme-light.webp" width="24%" alt="Light theme">
+<img src="docs/screenshots/theme-hackthebox.webp" width="24%" alt="HackTheBox theme">
+<img src="docs/screenshots/theme-dracula.webp" width="24%" alt="Dracula theme">
 </p>
 
-*Aurora (the default), Bloom, true-black Dark, Light, HackTheBox and Dracula.*
+*Aurora (the default), Bloom, Cobalt, true-black Dark, Light, HackTheBox and Dracula.*
 
 ### On a phone
 

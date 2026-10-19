@@ -75,6 +75,17 @@
   --orb1:rgba(255,95,168,.07); --orb2:rgba(125,80,255,.07); --orb3:rgba(255,255,255,.02);
   --shadow:0 24px 60px -24px rgba(6,0,18,.85);
 }
+[data-theme="cobalt"]{
+  /* dark, on a deep cobalt-blue background with a bright azure accent */
+  color-scheme:dark;
+  --bg:#0b1c4a; --surface:rgba(22,50,112,.56); --surface-strong:rgba(11,29,76,.95);
+  --surface2:rgba(150,190,255,.08); --line:rgba(150,190,255,.18); --hi:rgba(190,215,255,.17);
+  --text:#ecf2ff; --muted:#8ea9d9; --accent:#4f9dff; --accent-text:#03112e;
+  --cat-general:#6fb1ff; --cat-secops:#ff7a8a; --cat-change:#a98bff;
+  --cal:#33559e; --danger:#ff6f86; --ok:#35e0a1; --lcd-bg:rgba(0,8,32,.45);
+  --orb1:rgba(70,130,255,.30); --orb2:rgba(40,90,220,.28); --orb3:rgba(90,170,255,.16);
+  --shadow:0 24px 60px -24px rgba(2,8,34,.85);
+}
 [data-font="sans"]{ --ff:"Inter","SF Pro Display","Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,Roboto,sans-serif; }
 [data-font="mono"]{ --ff:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace; }
 [data-font="serif"]{ --ff:Georgia,"Times New Roman",serif; }
@@ -416,6 +427,7 @@ input.scrRename{font-size:12px;padding:1px 5px;width:120px;min-width:0}
 
 [data-theme="aurora"] option{background:#0f2028;color:#e8f4f6}
 [data-theme="bloom"] option{background:#1d0f36;color:#fcf2ff}
+[data-theme="cobalt"] option{background:#0f2358;color:#ecf2ff}
 
 /* ---- page headers, stat tiles, segmented controls (Dashboard / Tasks / Insights / Settings) ---- */
 .pageHead{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:2px 2px 16px}
@@ -938,7 +950,7 @@ let S = null;               // server state
 let dirty = false, saveT = null;
 const $ = s => document.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2, 10);
-const THEMES = [["dark","Dark"],["light","Light"],["htb","HackTheBox"],["dracula","Dracula"],["aurora","Aurora"],["bloom","Bloom"]];
+const THEMES = [["dark","Dark"],["light","Light"],["htb","HackTheBox"],["dracula","Dracula"],["aurora","Aurora"],["bloom","Bloom"],["cobalt","Cobalt"]];
 const FONTS = [["sans","Sans"],["mono","Mono"],["serif","Serif"]];
 const pad = n => String(n).padStart(2,"0");
 // The local calendar day as YYYY-MM-DD. (toISOString() is UTC, which puts the date a day out for hours each day.)

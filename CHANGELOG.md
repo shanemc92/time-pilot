@@ -581,4 +581,7 @@ Includes everything in 2.7.0.
   colour in the pink accent, the progress rings and the charts, rather than in
   glowing lights behind the page. Pick it in Settings -> Appearance (the theme
   previews show it); as with Aurora, 2.x falls back to Dark for an account set
-  to it. The README gallery now shows all six themes.
+  to it.
+- **FEATURE:** A seventh theme, **Cobalt**: a dark theme on a deep cobalt-blue
+  background with a bright azure accent. Same 2.x fallback as above. The README
+  gallery now shows all seven themes.
