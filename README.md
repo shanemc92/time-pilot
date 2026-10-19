@@ -15,13 +15,9 @@ classic look.
 
 See [CHANGELOG.md](CHANGELOG.md) for what's changed release to release.
 
-![TimePilot demo](docs/demo.webp)
+![TimePilot 3.1 Dashboard](docs/screenshots/dashboard.webp)
 
-![TimePilot 3.1 Dashboard](docs/screenshot.png)
-
-![TimePilot 3.1 Insights, Dark theme](docs/screenshot-dark.png)
-
-*The Dashboard in the Aurora theme (the default, top) and Insights in the true-black Dark theme.*
+More in [Screenshots](#screenshots).
 
 ## Versions
 
@@ -40,7 +36,7 @@ no Aurora theme, so an account set to it falls back to Dark when opened in
 (`image: ghcr.io/shanemc92/timepilot:2`) then `docker compose pull && docker
 compose up -d`. From source: `git clone --branch release/2.x
 https://github.com/shanemc92/timepilot.git`. Pinned to `:latest`? You'll get
-3.0 on your next pull. Security fixes are backported to 2.x.
+3.x on your next pull. Security fixes are backported to 2.x.
 
 ![TimePilot 2.x (Classic)](docs/screenshot-classic.png)
 
@@ -81,10 +77,10 @@ to plain translucent surfaces with no blur; everything still works.
   Markdown-aware clipboard library for reusable text/templates.
 - **Configurable board columns** - rename the kanban columns in Settings and
   run up to 6 of them. Defaults are Today, High Priority, Medium Priority,
-  Low Priority, Done. The first column is always what the Today tab plans
+  Low Priority, Done. The first column is always what the Planner works
   from, whatever it's called, and one column can be marked "clears daily".
 - **Split view** - pin any tab to the left half of the screen and hop
-  between the others on the right (Board next to Scratch, Today next to
+  between the others on the right (Tasks next to Scratch, Planner next to
   Snippets, and so on). Clicking the pinned tab swaps the two sides. The
   pinned tab is marked with a dot on the icon rail. The pin is remembered;
   narrow screens fall back to one tab at a time.
@@ -108,6 +104,91 @@ to plain translucent surfaces with no blur; everything still works.
   it touches the database (see "Security notes" below).
 - **Backup/restore** - export your account's data as a single JSON file
   from Settings, import it back (or into a different install) any time.
+
+## Screenshots
+
+All taken from the demo data that `sample_data.py` seeds, in the default Aurora
+theme unless noted.
+
+### Dashboard
+
+Opens on today: tasks done, time tracked, meetings left, rings to close, what's
+up next, your Today column (tick a task to finish it) and the week so far.
+
+![Dashboard](docs/screenshots/dashboard.webp)
+
+### Tasks
+
+The Kanban board, and the same tasks as a sortable list. Both have the summary
+row, category filter and search.
+
+![Tasks, Board layout](docs/screenshots/tasks-board.webp)
+
+![Tasks, List layout](docs/screenshots/tasks-list.webp)
+
+### Planner and timesheet
+
+The day planner merges your calendar with slotted tasks; the Export tab turns
+a day's entries into a timesheet.
+
+![Planner](docs/screenshots/planner.webp)
+
+![Timesheet export](docs/screenshots/export.webp)
+
+### Insights
+
+Pick 7 days to a year. Time by category, tasks finished against the previous
+period, estimate accuracy, top tasks and your weekday rhythm.
+
+![Insights](docs/screenshots/insights.webp)
+
+### Settings
+
+![Settings, Appearance and Hours](docs/screenshots/settings.webp)
+
+![Settings, Board and categories](docs/screenshots/settings-board.webp)
+
+### Notes, snippets, clipboard and scratchpad
+
+![Notes](docs/screenshots/notes.webp)
+
+![Snippets](docs/screenshots/snippets.webp)
+
+![Clipboard](docs/screenshots/clipboard.webp)
+
+![Scratchpad](docs/screenshots/scratch.webp)
+
+### Notifications
+
+![Scheduled ntfy reminders](docs/screenshots/notifications.webp)
+
+### Split view
+
+Any tab pinned beside any other - here Tasks next to the Planner.
+
+![Split view](docs/screenshots/split.webp)
+
+### Themes
+
+<p>
+<img src="docs/screenshots/theme-light.webp" width="49%" alt="Light theme">
+<img src="docs/screenshots/theme-dark.webp" width="49%" alt="Dark theme">
+<img src="docs/screenshots/theme-hackthebox.webp" width="49%" alt="HackTheBox theme">
+<img src="docs/screenshots/theme-dracula.webp" width="49%" alt="Dracula theme">
+</p>
+
+*Light, true-black Dark, HackTheBox and Dracula (Aurora, the default, is in the screenshots above).*
+
+### On a phone
+
+The icon rail becomes a bottom dock and the timer bar shrinks to one row.
+
+<p>
+<img src="docs/screenshots/mobile-dashboard.webp" width="24%" alt="Dashboard on a phone">
+<img src="docs/screenshots/mobile-tasks.webp" width="24%" alt="Task list on a phone">
+<img src="docs/screenshots/mobile-insights.webp" width="24%" alt="Insights on a phone">
+<img src="docs/screenshots/mobile-settings.webp" width="24%" alt="Settings on a phone">
+</p>
 
 ## Architecture
 

@@ -562,5 +562,15 @@ Includes everything in 2.7.0.
   slot, completion date and completion record in step.
 - **BUGFIX:** The dashboard and the startup warm-up no longer fetch the same
   day's calendar twice at once.
-- The demo data (`sample_data.py`) now includes six weeks of history so
-  Insights has something to show.
+- **FEATURE:** The demo data (`sample_data.py`) now includes six weeks of
+  history so Insights has something to show.
+- **FEATURE:** On small screens the timer bar is a single compact row (timer,
+  task, Stop, sign out) with the quick timers in a swipeable row beneath it,
+  instead of three stacked rows.
+- **BUGFIX:** The demo data's stand-ups and meetings are marked as already
+  imported, so opening a day on the Export tab no longer adds each one a second
+  time.
+- **FEATURE:** The README has a screenshot gallery - every tab, the themes,
+  split view and a phone layout - as WebP files in `docs/screenshots/`. The old
+  demo animation (`docs/demo.webp`) and the two 3.0-era screenshots are removed
+  until the animation is re-recorded.

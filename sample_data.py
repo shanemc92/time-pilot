@@ -101,6 +101,10 @@ def build():
     chatter = ["Email - client query", "Message - deploy window", "Call - vendor renewal", "Message - access request"]
     hm = lambda m: "%02d:%02d" % (m // 60, m % 60)
     hist_log, hist_done = [], []
+    # The log already holds these stand-ups and meetings, so tell the calendar import it has seen them
+    # (its key is the event's start time, as the server serves it, and its title); otherwise opening a day
+    # imports them a second time.
+    seen = {}
     for k in range(45, 3, -1):
         day = today - datetime.timedelta(days=k)
         if day.weekday() > 4:
@@ -118,6 +122,7 @@ def build():
             return start + mins
 
         add("Team standup", "meetings", 9 * 60, 15, cal=True)
+        seen[iso] = [iso + "T09:00:00|Team standup"]
         cursor = 9 * 60 + 20
         if rng.random() < 0.45:
             cursor = add(rng.choice(["Client sync", "1:1 with manager", "Design review"]), "meetings",
@@ -132,6 +137,10 @@ def build():
                 cursor = add(rng.choice(chatter), "admin", cursor, rng.choice([5, 10, 15, 20]))
             if cursor > 12 * 60 + 15 and cursor < 13 * 60:
                 cursor = 13 * 60
+
+    for d in (d3, d2, y, today):
+        seen[d.isoformat()] = [d.isoformat() + "T09:00:00|Team standup"]
+    seen[y.isoformat()].append(y.isoformat() + "T10:00:00|Sprint planning")
 
     return {
         "settings": {
@@ -247,7 +256,7 @@ def build():
              "interval_type": None, "interval_value": None, "days": None, "tz": None, "created": int(time.time())},
         ],
         "activeTimer": None,
-        "calSeen": {},
+        "calSeen": seen,
     }
 
 
