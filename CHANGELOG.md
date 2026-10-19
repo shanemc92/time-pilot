@@ -574,3 +574,12 @@ Includes everything in 2.7.0.
   split view and a phone layout - as WebP files in `docs/screenshots/`. The old
   demo animation (`docs/demo.webp`) and the two 3.0-era screenshots are removed
   until the animation is re-recorded.
+
+## Bloom theme
+
+- **FEATURE:** A sixth theme, **Bloom**: four large magenta, violet, blue and
+  orange lights behind deep-plum glass, with a pink accent. Its panels carry
+  their own frosting so text stays readable over the colour. Pick it in
+  Settings -> Appearance (the theme previews show it); as with Aurora, 2.x
+  falls back to Dark for an account set to it. The README gallery now shows all
+  six themes.
