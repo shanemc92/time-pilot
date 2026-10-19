@@ -5,26 +5,29 @@ exporter for multiple users - Kanban board, calendar-aware day view, code
 snippet & clipboard libraries, all behind your own login. Data is encrypted
 at rest in PostgreSQL.
 
-**3.0 - Glass.** A ground-up visual refresh: frosted-glass panels, a floating
-icon rail, and a glowing LCD timer. The functionality is identical to 2.x -
-same backend, same data, same features. See [Versions](#versions) if you'd
-rather stay on the classic look.
+**3.1 - Dashboard & Insights.** Builds on the 3.0 glass look (frosted panels, a
+floating icon rail, a glowing LCD timer) with a **Dashboard** that opens on
+today, a **Tasks** page with Board and List layouts, an **Insights** page that
+charts where your time and finished tasks went over 7 days to a year, and
+**Settings** as a tab of its own. Same backend and database as 2.x - your data
+carries straight over. See [Versions](#versions) if you'd rather stay on the
+classic look.
 
 See [CHANGELOG.md](CHANGELOG.md) for what's changed release to release.
 
 ![TimePilot demo](docs/demo.webp)
 
-![TimePilot 3.0 screenshot](docs/screenshot.png)
+![TimePilot 3.1 Dashboard](docs/screenshot.png)
 
-![TimePilot 3.0, Dark theme](docs/screenshot-dark.png)
+![TimePilot 3.1 Insights, Dark theme](docs/screenshot-dark.png)
 
-*3.0 with the Aurora theme (the default, top) and the true-black Dark theme.*
+*The Dashboard in the Aurora theme (the default, top) and Insights in the true-black Dark theme.*
 
 ## Versions
 
 | | Look | Where to get it |
 |---|---|---|
-| **3.x - Glass** (current) | Frosted glass, icon rail, ambient light | `main`, image `:latest` / `:3` |
+| **3.x - Glass** (current) | Frosted glass, icon rail, Dashboard, Insights | `main`, image `:latest` / `:3` |
 | **2.x - Classic** | Flat dark UI, top tab bar | branch `release/2.x`, tag `v2.7.0`, image `:2` / `:2.7` |
 
 The two share the same backend and database schema, so you can switch
@@ -51,10 +54,20 @@ to plain translucent surfaces with no blur; everything still works.
 
 - **Multi-user** - sign up, log in, each user's board/tasks/notes/snippets
   are private to them.
-- **Kanban board** - Today / This Week / Next Week / Next Month / Done, with
-  drag-and-drop and customisable categories. Done clears itself daily (your
-  time history is kept).
-- **Day planner** - a timeline merging your calendar with slotted tasks.
+- **Dashboard** - opens on today: tasks done, time tracked, meetings left,
+  progress rings, what's up next (meetings and slotted tasks), your Today
+  column with tick-to-finish checkboxes, and this week's finished tasks
+  against last week.
+- **Tasks** - a Kanban **Board** (drag-and-drop, customisable columns and
+  categories) or a sortable **List**, with a summary row, a category filter and
+  search. Done clears itself daily - your time history and a record of every
+  finished task are kept.
+- **Insights** - pick 7 days, 30 days, 90 days or a year: time tracked per day
+  or week by category, tasks finished against the previous period, time by
+  category, estimate accuracy (estimate against the time you logged), top tasks
+  by time and your weekday rhythm. Every chart has hover details and the
+  trend charts a table view.
+- **Planner** (the day planner) - a timeline merging your calendar with slotted tasks.
   Drag to reschedule; "Auto" drops a task into the first free gap that fits,
   skipping over a lunch break if you've set one. Overlapping meetings and/or
   tasks are shown side by side rather than hiding each other.
@@ -75,6 +88,9 @@ to plain translucent surfaces with no blur; everything still works.
   Snippets, and so on). Clicking the pinned tab swaps the two sides. The
   pinned tab is marked with a dot on the icon rail. The pin is remembered;
   narrow screens fall back to one tab at a time.
+- **Settings tab** - Account, Appearance (with theme previews), Hours & day,
+  Reminders, Push notifications, Board & categories, Calendar and Data &
+  backup, each saved as you change it.
 - **Themes** - Aurora (default), a true-black Dark, light, HTB and Dracula (Settings ->
   Appearance), all built on the glass look. On phones the icon rail becomes a
   bottom dock.
@@ -231,7 +247,7 @@ break that "Auto" slotting skips over.
 ## Notifications (optional)
 
 TimePilot can push reminders to your phone via [ntfy](https://ntfy.sh).
-Configure it in **⚙ Settings → Notifications & ntfy**:
+Configure it in **Settings → Push notifications**:
 
 1. **Server URL** - `https://ntfy.sh`, or your own self-hosted server.
 2. **Topic** - any name you like, e.g. `timepilot-a7f3c2e9`. Subscribe to the
@@ -372,7 +388,7 @@ Built your own image instead (option 2 above)? Pull the latest source,
 
 ## Data & backups
 
-**Per-account export/import.** Logged in, Settings → Backup → Export data
+**Per-account export/import.** Logged in, Settings → Data & backup → Export
 downloads a JSON file with everything in that account - tasks, notes,
 snippets, clipboard items, scheduled reminders, and settings. Import restores
 from a previously exported file, **replacing** everything currently in the

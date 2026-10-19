@@ -69,6 +69,24 @@ class Injection(unittest.TestCase):
         self.assertEqual((e["start"], e["end"], e["minutes"], e["taskId"]), ("00:00", "00:00", 1, None))
         self.assertEqual(S.clean_timelog([{"date": PAYLOAD}]), [])
 
+    def test_completed_fields(self):
+        (c,) = S.clean_completed([{"id": PAYLOAD, "taskId": PAYLOAD, "title": 5, "category": PAYLOAD,
+                                   "est": PAYLOAD, "date": "2026-01-02"}])
+        self.assertRegex(c["id"], r"^[0-9a-f]{8}$")
+        self.assertEqual((c["taskId"], c["title"], c["est"]), (None, "", 30))
+        # No usable date means the record can't be placed on any day, so it is dropped.
+        self.assertEqual(S.clean_completed([{"date": PAYLOAD}, {"title": "x"}, "x", None]), [])
+        self.assertEqual(S.clean_completed("nope"), [])
+
+    def test_completed_is_capped_to_the_newest_records(self):
+        many = [{"id": "c%d" % i, "date": "2026-01-02"} for i in range(S.MAX_COMPLETED + 5)]
+        out = S.clean_completed(many)
+        self.assertEqual((len(out), out[-1]["id"]), (S.MAX_COMPLETED, "c%d" % (S.MAX_COMPLETED + 4)))
+
+    def test_task_view_setting(self):
+        self.assertEqual(S.clean_settings({"taskView": "list"})["taskView"], "list")
+        self.assertEqual(S.clean_settings({"taskView": PAYLOAD})["taskView"], "board")
+
     def test_reminders_in_a_backup_get_the_same_checks_as_the_api(self):
         good = {"message": "m", "next_fire": 1, "priority": 3}
         self.assertEqual(S.clean_reminder(dict(good, priority=PAYLOAD))["priority"], 3)
@@ -139,9 +157,9 @@ class TypeConfusion(unittest.TestCase):
                     for _ in range(rnd.randint(0, 4))}
 
         for _ in range(2000):
-            state = {k: junk() for k in ("settings", "tasks", "timelog", "notes", "snippets", "pastes",
-                                          "scratch", "calSeen", "reminders", "activeTimer")}
-            for k in ("tasks", "timelog", "notes", "snippets", "pastes", "reminders"):
+            state = {k: junk() for k in ("settings", "tasks", "timelog", "completed", "notes", "snippets",
+                                          "pastes", "scratch", "calSeen", "reminders", "activeTimer")}
+            for k in ("tasks", "timelog", "completed", "notes", "snippets", "pastes", "reminders"):
                 if not isinstance(state[k], list):
                     state[k] = [state[k]]
             for k in ("settings", "scratch", "calSeen"):

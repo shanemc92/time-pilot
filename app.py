@@ -44,6 +44,9 @@ JSON_DOMAINS = {
     "settings": ["settings"],
     "tasks": ["tasks"],
     "history": ["timelog"],
+    # Its own row, not part of "history": a 2.x server only reads and writes the
+    # domains it knows, so switching back to 2.x leaves this one untouched.
+    "completed": ["completed"],
     "notes": ["notes"],
     "snippets": ["snippets"],
     "clipboard": ["pastes"],
@@ -96,6 +99,7 @@ KEY_DEFAULTS = {
     "settings": DEFAULT_SETTINGS,
     "tasks": [],
     "timelog": [],
+    "completed": [],
     "notes": [
         {"id": "n1", "title": "To follow up", "items": []},
         {"id": "n2", "title": "Questions", "items": []},
@@ -266,9 +270,9 @@ _ics_session = requests.Session()
 _ics_session.mount("http://", _ValidatingHTTPAdapter())
 _ics_session.mount("https://", _ValidatingHTTPAdapter())
 STATE_SHAPE = {
-    "settings": dict, "tasks": list, "timelog": list, "notes": list,
-    "snippets": list, "pastes": list, "reminders": list, "calSeen": dict,
-    "scratch": dict,
+    "settings": dict, "tasks": list, "timelog": list, "completed": list,
+    "notes": list, "snippets": list, "pastes": list, "reminders": list,
+    "calSeen": dict, "scratch": dict,
 }
 
 

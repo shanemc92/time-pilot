@@ -85,6 +85,54 @@ def build():
     d2 = today - datetime.timedelta(days=2)
     d3 = today - datetime.timedelta(days=3)
 
+    # Six weeks of working days before the hand-written week below, so the
+    # Insights page has something to chart: a stand-up, the odd meeting, two or
+    # three tasks that took a bit more or less than estimated (each also logged
+    # as finished), and a few interruptions. Seeded, so every reseed looks alike.
+    import random
+    rng = random.Random(42)
+    pool = [("Reply to project emails", "admin", 30), ("Draft weekly status update", "general", 45),
+            ("Review pull requests", "general", 60), ("Prepare slides for team demo", "meetings", 90),
+            ("Update project documentation", "admin", 60), ("Follow up with client on proposal", "admin", 20),
+            ("Plan next sprint", "meetings", 120), ("Refactor auth module", "general", 180),
+            ("Quarterly goals review", "general", 60), ("Renew SSL certificates", "admin", 30),
+            ("Write release notes", "general", 45), ("Triage new tickets", "admin", 40),
+            ("Investigate slow report", "general", 90), ("Pair on API design", "general", 75)]
+    chatter = ["Email - client query", "Message - deploy window", "Call - vendor renewal", "Message - access request"]
+    hm = lambda m: "%02d:%02d" % (m // 60, m % 60)
+    hist_log, hist_done = [], []
+    for k in range(45, 3, -1):
+        day = today - datetime.timedelta(days=k)
+        if day.weekday() > 4:
+            continue
+        iso, n = day.isoformat(), 0
+
+        def add(label, cat, start, mins, task_id=None, cal=False):
+            nonlocal n
+            n += 1
+            e = {"id": "h%d_%d" % (k, n), "date": iso, "label": label, "taskId": task_id, "category": cat,
+                 "start": hm(start), "end": hm(start + mins), "minutes": mins}
+            if cal:
+                e["source"] = "cal"
+            hist_log.append(e)
+            return start + mins
+
+        add("Team standup", "meetings", 9 * 60, 15, cal=True)
+        cursor = 9 * 60 + 20
+        if rng.random() < 0.45:
+            cursor = add(rng.choice(["Client sync", "1:1 with manager", "Design review"]), "meetings",
+                         10 * 60 + 30, rng.choice([30, 45, 60]), cal=True)
+        for i in range(rng.choice([2, 3, 3])):
+            title, cat, est = rng.choice(pool)
+            mins = max(10, int(round(est * rng.uniform(0.6, 1.5) / 5.0)) * 5)
+            tid = "h%d%s" % (k, "abc"[i])
+            cursor = add(title, cat, cursor + rng.choice([0, 5, 10]), mins, task_id=tid)
+            hist_done.append({"id": "c" + tid, "taskId": tid, "title": title, "category": cat, "est": est, "date": iso})
+            if rng.random() < 0.5:
+                cursor = add(rng.choice(chatter), "admin", cursor, rng.choice([5, 10, 15, 20]))
+            if cursor > 12 * 60 + 15 and cursor < 13 * 60:
+                cursor = 13 * 60
+
     return {
         "settings": {
             "icsUrl": "",
@@ -123,10 +171,16 @@ def build():
             {"id": "t10", "title": "Refactor auth module", "category": "general", "column": "nextweek", "est": 180, "slot": None},
             {"id": "t7", "title": "Quarterly goals review", "category": "general", "column": "nextmonth", "est": 60, "slot": None},
             {"id": "t11", "title": "Renew SSL certificates", "category": "admin", "column": "nextmonth", "est": 30, "slot": None},
+            {"id": "t13", "title": "Write release notes", "category": "general", "column": "today", "est": 45, "slot": None,
+             "details": "Cover the new dashboard, the Insights page and the settings tab.\nCheck the changelog for anything missed."},
+            {"id": "t14", "title": "Triage new tickets", "category": "admin", "column": "week", "est": 40, "slot": None},
+            {"id": "t15", "title": "Pair on API design", "category": "general", "column": "week", "est": 75, "slot": None},
+            {"id": "t16", "title": "Investigate slow report", "category": "general", "column": "nextweek", "est": 90, "slot": None},
+            {"id": "t17", "title": "Book travel for the offsite", "category": "admin", "column": "nextmonth", "est": 25, "slot": None},
             {"id": "t8", "title": "Set up local dev environment", "category": "admin", "column": "done", "est": 45, "slot": None, "doneAt": today.isoformat()},
             {"id": "t12", "title": "Fix login page styling", "category": "general", "column": "done", "est": 30, "slot": None, "doneAt": y.isoformat()},
         ],
-        "timelog": [
+        "timelog": hist_log + [
             {"id": "e0", "date": d3.isoformat(), "label": "Team standup", "taskId": None, "source": "cal", "category": "meetings", "start": "09:00", "end": "09:15", "minutes": 15},
             {"id": "e0b", "date": d3.isoformat(), "label": "Onboarding new starter", "taskId": None, "category": "admin", "start": "09:20", "end": "10:15", "minutes": 55},
             {"id": "e0c", "date": d3.isoformat(), "label": "Call - vendor renewal", "taskId": None, "category": "admin", "start": "10:20", "end": "10:40", "minutes": 20},
@@ -145,6 +199,12 @@ def build():
             {"id": "e9", "date": today.isoformat(), "label": "Team standup", "taskId": None, "source": "cal", "category": "meetings", "start": "09:00", "end": "09:15", "minutes": 15},
             {"id": "e10", "date": today.isoformat(), "label": "Set up local dev environment", "taskId": "t8", "category": "admin", "start": "09:15", "end": "10:00", "minutes": 45},
             {"id": "e11", "date": today.isoformat(), "label": "Reply to project emails", "taskId": "t1", "category": "admin", "start": "10:00", "end": "10:25", "minutes": 25},
+        ],
+        "completed": hist_done + [
+            {"id": "c1", "taskId": None, "title": "Onboarding new starter", "category": "admin", "est": 60, "date": d3.isoformat()},
+            {"id": "c2", "taskId": None, "title": "Code review", "category": "general", "est": 90, "date": d2.isoformat()},
+            {"id": "c3", "taskId": "t12", "title": "Fix login page styling", "category": "general", "est": 30, "date": y.isoformat()},
+            {"id": "c4", "taskId": "t8", "title": "Set up local dev environment", "category": "admin", "est": 45, "date": today.isoformat()},
         ],
         "notes": [
             {"id": "n1", "title": "To follow up", "items": [

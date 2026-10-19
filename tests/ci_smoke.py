@@ -60,6 +60,9 @@ st = s.get(BASE + "/api/state"); check("GET /api/state", st.status_code == 200 a
 exp = s.get(BASE + "/api/export"); check("GET /api/export", exp.status_code == 200)
 imp = s.post(BASE + "/api/import", json=exp.json()); check("POST /api/import round trip", imp.status_code == 200, imp.text[:200])
 check("state intact after import", len(s.get(BASE + "/api/state").json()["tasks"]) == len(st.json()["tasks"]))
+after = s.get(BASE + "/api/state").json()
+check("finished-task record survives the round trip",
+      len(st.json()["completed"]) > 0 and len(after["completed"]) == len(st.json()["completed"]))
 
 # 4. point ntfy at ourselves
 state = s.get(BASE + "/api/state").json()

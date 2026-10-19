@@ -36,6 +36,7 @@ MAX_COLUMNS = 6            # matches COL_MAX in the client
 MAX_CATEGORIES = 50
 MAX_SHORT_LISTS = 100      # interrupts, quick tags
 MAX_IGNORE = 500
+MAX_COMPLETED = 50000      # ~130 a day for a year; the Insights page reads at most two years
 MAX_PADS = 8               # matches SCR_MAX in the client
 
 
@@ -107,7 +108,7 @@ _SETTINGS_KNOWN = {
     "viewEnd", "lunchStart", "lunchEnd", "rounding", "remind", "remindLead",
     "remindMeetings", "syncLastTaskEnd", "browserNotifications", "ntfyUrl",
     "ntfyTopic", "ntfyIcon", "ntfyTasks", "columns", "quickTags", "interrupts",
-    "ignoreEvents", "categories",
+    "ignoreEvents", "categories", "taskView",
 }
 
 
@@ -124,8 +125,9 @@ def clean_settings(s):
     for k, default in (("theme", "dark"), ("font", "sans")):
         if k in s:
             out[k] = s[k] if isinstance(s[k], str) and _WORD.match(s[k]) else default
-    if "pinView" in s:
-        out["pinView"] = s["pinView"] if isinstance(s["pinView"], str) and _WORD.match(s["pinView"]) else ""
+    for k, default in (("pinView", ""), ("taskView", "board")):
+        if k in s:
+            out[k] = s[k] if isinstance(s[k], str) and _WORD.match(s[k]) else default
     for k, default in (("dayStart", "08:00"), ("dayEnd", "18:00")):
         if k in s:
             out[k] = _hm(s[k], default)
@@ -232,6 +234,29 @@ def clean_timelog(entries):
         if e.get("source") == "cal":
             rec["source"] = "cal"
         out.append(_keep_unknown(e, _LOG_KNOWN, rec))
+    return out
+
+
+_DONE_KNOWN = {"id", "taskId", "title", "category", "est", "date"}
+
+
+def clean_completed(entries):
+    """The record of finished tasks. A task leaves the board a day after it is
+    done, so this is what the Dashboard and Insights count from."""
+    out = []
+    for e in _dicts(entries)[-MAX_COMPLETED:]:
+        date = _date(e.get("date"))
+        if not date:
+            continue
+        rec = {
+            "id": _key(e.get("id")) or _new_id(),
+            "taskId": _key(e.get("taskId")),
+            "title": _str(e.get("title"), "", 500),
+            "category": _str(e.get("category"), "", 64),
+            "est": _int(e.get("est"), 30, 1, 100000),
+            "date": date,
+        }
+        out.append(_keep_unknown(e, _DONE_KNOWN, rec))
     return out
 
 
@@ -342,8 +367,9 @@ def clean_reminders(rs):
 
 _CLEANERS = {
     "settings": clean_settings, "tasks": clean_tasks, "timelog": clean_timelog,
-    "notes": clean_notes, "snippets": clean_library, "pastes": clean_library,
-    "scratch": clean_scratch, "calSeen": clean_cal_seen, "reminders": clean_reminders,
+    "completed": clean_completed, "notes": clean_notes, "snippets": clean_library,
+    "pastes": clean_library, "scratch": clean_scratch, "calSeen": clean_cal_seen,
+    "reminders": clean_reminders,
 }
 
 

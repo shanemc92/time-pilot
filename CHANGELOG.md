@@ -506,3 +506,48 @@ Includes everything in 2.7.0.
   running in UTC would otherwise put early-morning reminders on the wrong
   day. Reminders saved before this change have no `days`/`tz` and behave
   exactly as before; the export format gains the two optional fields.
+
+## 3.1.0 - Dashboard, Insights and a Settings tab
+
+- **FEATURE:** A **Dashboard** is now the first tab: a greeting, today at a
+  glance (tasks done, time tracked, meetings left, open tasks), three progress
+  rings, an "Up next" card with the next meeting and your slotted tasks, your
+  Today-column tasks with tick-to-finish checkboxes, and this week's finished
+  tasks against last week. It redraws every minute.
+- **FEATURE:** The Board tab is now **Tasks**: a summary row, a category
+  filter and search, a **New task** button and a Board / List switch (remembered
+  per account). The list sorts by task, category, status or estimate and lets
+  you change a task's status in place.
+- **FEATURE:** A new **Insights** tab with a 7D / 30D / 90D / 1Y selector: time
+  tracked per day or week by category, tasks finished against the previous
+  period, time by category, estimate accuracy (estimate against the time logged
+  on the task), top tasks by time and average tracked time per weekday. The
+  charts are plain HTML and SVG - no new dependency and nothing for the CSP to
+  allow - with hover and keyboard detail, and a Table view on the two trend
+  charts.
+- **FEATURE:** **Settings** is a tab, not a modal: Account, Appearance (with
+  theme previews), Hours & day, Reminders, Push notifications, Board &
+  categories, Calendar and Data & backup. Every control saves as you change it;
+  an invalid time range (work hours, display range, lunch) says why it wasn't
+  saved. Deleting a column or category that is in use asks first and says where
+  its tasks will go.
+- **FEATURE:** Every finished task is now recorded in a new `completed` list
+  (its own row in the database, so 2.x ignores it and switching back loses
+  nothing). The board clears done tasks the next day, so without it there was
+  nothing to count "finished this week" from. Tasks already in the done column
+  when you upgrade are recorded straight away; earlier ones can't be recovered.
+  Included in export/import and validated like the rest of the state
+  (`sanitize.clean_completed`).
+- **FEATURE:** The Today tab is renamed **Planner**, so it isn't mistaken for
+  the Dashboard. Its internal name is unchanged, so a pinned split view survives.
+- **BUGFIX:** "Today" was the UTC date, not yours: for a few hours each day (the
+  first hour after midnight in Ireland in summer, the evening in the Americas)
+  new timer entries, the Export date and the calendar fetch used the wrong day.
+  It now uses the local date.
+- **BUGFIX:** Marking a task done now goes through one code path, so moving it
+  by drag-and-drop, the edit dialog, the list or a checkbox always keeps its
+  slot, completion date and completion record in step.
+- **BUGFIX:** The dashboard and the startup warm-up no longer fetch the same
+  day's calendar twice at once.
+- The demo data (`sample_data.py`) now includes six weeks of history so
+  Insights has something to show.

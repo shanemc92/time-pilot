@@ -310,20 +310,6 @@ section[id^="view-"]{animation:rise .35s cubic-bezier(.2,.7,.2,1)}
 .dayRow button{flex:1;min-width:0;padding:8px 0;border-radius:10px;font-size:12px;font-weight:600;color:var(--muted)}
 .dayRow button.on{color:var(--text);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
 
-/* ---- settings accordion ---- */
-#modalBox.settings{width:min(580px,100%);display:flex;flex-direction:column;max-height:90vh;padding:0}
-#modalBox.settings > h3{padding:20px 22px 12px;margin:0;flex:none}
-#setBody{overflow:auto;padding:0 22px;flex:1 1 auto}
-#modalBox.settings .mActions{flex:none;padding:14px 22px;border-top:1px solid var(--line);background:transparent;border-radius:0 0 26px 26px;margin:0}
-.setSec{border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden;background:var(--surface2)}
-.setSec > summary{padding:11px 14px;cursor:pointer;font-size:13px;font-weight:650;list-style:none;display:flex;align-items:center;gap:8px;transition:background .15s}
-.setSec > summary:hover{background:var(--surface2)}
-.setSec > summary::-webkit-details-marker{display:none}
-.setSec > summary::before{content:"▸";color:var(--accent);font-size:11px;transition:transform .2s}
-.setSec[open] > summary::before{content:"▸";transform:rotate(90deg)}
-.setSec .setSecBody{padding:12px 14px 4px;border-top:1px solid var(--line)}
-.setSec .fRow:last-child{margin-bottom:8px}
-
 /* ---- export ---- */
 #exportWrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap)}
 @media(max-width:1100px){#exportWrap{grid-template-columns:1fr}}
@@ -419,6 +405,252 @@ input.scrRename{font-size:12px;padding:1px 5px;width:120px;min-width:0}
 
 [data-theme="aurora"] option{background:#0f2028;color:#e8f4f6}
 
+/* ---- page headers, stat tiles, segmented controls (Dashboard / Tasks / Insights / Settings) ---- */
+.pageHead{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:2px 2px 16px}
+.pageHead .grow{flex:1 1 240px;min-width:0}
+.pageHead h2{font-size:28px;font-weight:700;letter-spacing:-.025em;line-height:1.15}
+.pageHead .sub{color:var(--muted);font-size:13px;margin-top:3px}
+.pageHead .acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pageHead .acts button{display:inline-flex;align-items:center;gap:6px}
+.pageHead .acts svg,.seg svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+button.big{border-radius:14px;padding:9px 16px;font-size:13.5px}
+.statRow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:var(--gap)}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 16px;min-width:0;
+  box-shadow:var(--shadow), inset 0 1px 0 var(--hi)}
+.stat .k{font-size:12px;color:var(--muted);font-weight:550}
+.stat .v{font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:2px;white-space:nowrap}
+.stat .v small{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0;margin-left:3px}
+.stat .d,.delta{font-size:11px;font-weight:650;color:var(--muted)}
+.stat .d{margin-top:2px}
+.delta{font-size:12px}
+.up{color:var(--ok)!important} .down{color:var(--danger)!important}
+.seg{display:inline-flex;gap:2px;padding:3px;background:var(--surface2);border:1px solid var(--line);border-radius:13px}
+.seg button{border:none;background:transparent;border-radius:10px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--muted);
+  display:inline-flex;align-items:center;gap:6px}
+.seg button:hover{border-color:transparent;background:color-mix(in srgb,var(--text) 7%,transparent);color:var(--text)}
+.seg button.on{background:var(--surface-strong);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.28), inset 0 1px 0 var(--hi)}
+.ph{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}
+.ph .t{font-size:16px;font-weight:650;letter-spacing:-.01em}
+.ph .s{font-size:12px;color:var(--muted);margin-top:1px}
+.ph .r{margin-left:auto;display:flex;gap:6px;align-items:center;flex:none}
+.linkBtn{background:none;border:none;color:var(--accent);padding:2px 4px;font-size:12px;font-weight:650;border-radius:6px}
+.linkBtn:hover{background:none;border:none;text-decoration:underline}
+.emptyNote{color:var(--muted);font-size:13px;padding:10px 2px}
+.catDot{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none}
+.leg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);margin-top:12px}
+.leg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px}
+.leg .dash{display:inline-block;width:16px;height:0;border-top:2px dashed var(--muted);margin-right:6px;vertical-align:middle}
+.leg .solid{display:inline-block;width:16px;height:0;border-top:2px solid var(--accent);margin-right:6px;vertical-align:middle}
+.leg b{color:var(--text);font-weight:600}
+
+/* ---- tooltip shared by every chart ---- */
+#tip{position:fixed;z-index:80;pointer-events:none;display:none;max-width:280px;background:var(--surface-strong);
+  border:1px solid var(--line);border-radius:12px;padding:8px 11px;font-size:12px;
+  box-shadow:0 16px 36px -12px rgba(0,0,0,.7), inset 0 1px 0 var(--hi)}
+#tip .th{font-weight:650;color:var(--muted);margin-bottom:4px}
+#tip .tr{display:flex;gap:8px;align-items:center;white-space:nowrap;line-height:1.55}
+#tip .tr i{width:10px;height:3px;border-radius:2px;flex:none}
+#tip .tr b{margin-left:auto;padding-left:14px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ---- dashboard ---- */
+#dashGrid,#insGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gap);align-items:stretch}
+#insGrid .wide{grid-column:1 / -1}
+@media(max-width:900px){#dashGrid,#insGrid{grid-template-columns:minmax(0,1fr)}}
+main.split #dashGrid,main.split #insGrid{grid-template-columns:minmax(0,1fr)}
+.ringWrap{display:flex;align-items:center;justify-content:center;gap:26px;flex-wrap:wrap;padding:4px 0}
+.rings{width:168px;height:168px;flex:none}
+.rings circle{fill:none;stroke-width:9;stroke-linecap:round}
+.rings .trk{stroke:var(--line)}
+.ringLeg{display:flex;flex-direction:column;gap:14px}
+.ringLeg .li{display:flex;gap:10px;align-items:center}
+.ringLeg .bar{width:4px;height:34px;border-radius:3px;flex:none}
+.ringLeg .n{font-size:20px;font-weight:700;line-height:1.1;letter-spacing:-.01em}
+.ringLeg .n small{font-size:13px;color:var(--muted);font-weight:600}
+.ringLeg .l{font-size:12px;color:var(--muted)}
+.nextHero{border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:16px;padding:14px 16px;margin-bottom:10px;
+  background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 14%,var(--surface2)),var(--surface2))}
+.nextHero .when{font-size:12px;font-weight:650;color:var(--accent)}
+.nextHero .name{font-size:19px;font-weight:700;letter-spacing:-.015em;margin:2px 0 3px;overflow-wrap:anywhere}
+.nextHero .meta{font-size:12px;color:var(--muted)}
+.agendaItem{display:flex;gap:12px;align-items:center;padding:9px 2px;border-bottom:1px solid var(--line)}
+.agendaItem:last-child{border-bottom:none}
+.agendaItem .bar{width:3px;align-self:stretch;min-height:20px;border-radius:3px;flex:none}
+.agendaItem .nm{flex:1;min-width:0;font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.agendaItem .tm{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.agendaItem.past{opacity:.5}
+.taskRow{display:flex;gap:11px;align-items:center;padding:10px 2px;border-bottom:1px solid var(--line)}
+.taskRow:last-child{border-bottom:none}
+.taskRow .main{flex:1;min-width:0}
+.taskRow .ti{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.taskRow.done .ti,#taskTable tr.done .tt{text-decoration:line-through;color:var(--muted)}
+.taskRow .mt{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--muted);margin-top:3px;flex-wrap:wrap}
+.taskRow .go{flex:none;padding:3px 9px;font-size:11px}
+.chk{flex:none;width:20px;height:20px;padding:0;border-radius:50%;border:2px solid var(--muted);background:transparent;
+  display:inline-flex;align-items:center;justify-content:center;color:transparent}
+.chk:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.chk.on{background:var(--accent);border-color:var(--accent);color:var(--accent-text)}
+.chk svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.weekHero{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.weekHero .big{font-size:38px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.weekHero .what{font-size:13px;color:var(--muted)}
+.barRow{display:flex;gap:6px;height:132px;margin-top:10px}
+.barSlot{flex:1;min-width:0;position:relative;border-radius:10px;outline:none}
+.barSlot:hover,.barSlot:focus-visible,.chSlot:hover,.chSlot:focus-visible{background:color-mix(in srgb,var(--text) 6%,transparent)}
+.barSlot .bar1{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:24px;height:var(--h);min-height:3px;
+  border-radius:6px 6px 0 0;background:color-mix(in srgb,var(--accent) 45%,transparent)}
+.barSlot.now .bar1{background:var(--accent)}
+.barSlot.future .bar1{background:var(--line)}
+.barSlot .bv{position:absolute;left:0;right:0;bottom:calc(var(--h) + 4px);text-align:center;font-size:11px;font-weight:650;color:var(--muted)}
+.barSlot.now .bv{color:var(--text)}
+.barLbls{display:flex;gap:6px;margin-top:6px}
+.barLbls span{flex:1;min-width:0;text-align:center;font-size:11px;color:var(--muted)}
+.barLbls span.now{color:var(--text);font-weight:650}
+.stackBar{display:flex;gap:2px;height:10px;border-radius:6px;overflow:hidden;margin:14px 0 0}
+.stackBar span{display:block;min-width:3px}
+
+/* ---- tasks page ---- */
+.filterBar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:var(--gap);padding:8px 10px;
+  background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow), inset 0 1px 0 var(--hi)}
+.filterBar select,.filterBar input{border-radius:999px;font-size:13px}
+.filterBar input{flex:1 1 220px;min-width:140px;padding-left:14px}
+#taskList{padding:6px 16px;overflow-x:auto}
+#taskTable{min-width:680px}
+#taskTable th{cursor:pointer;user-select:none;white-space:nowrap}
+#taskTable th.sorted{color:var(--text)}
+#taskTable th.noSort{cursor:default}
+#taskTable td{padding:9px 6px}
+#taskTable td.num{white-space:nowrap;color:var(--muted)}
+#taskTable select{width:100%;min-width:110px;font-size:12px;padding:4px 7px}
+#taskTable .tt{font-weight:600;overflow-wrap:anywhere}
+#taskTable .acts{white-space:nowrap;text-align:right}
+#taskTable .acts button{padding:3px 8px;font-size:11px}
+
+/* ---- insights charts (plain HTML + a little SVG: no library, scales with its container) ---- */
+.ch{display:grid;grid-template-columns:42px minmax(0,1fr);grid-template-rows:var(--chh,200px) auto;column-gap:8px}
+.chY{position:relative;font-size:11px;color:var(--muted)}
+.chY span{position:absolute;right:0;transform:translateY(50%);font-variant-numeric:tabular-nums;white-space:nowrap}
+.chPlot{position:relative;border-bottom:1px solid var(--line)}
+.chGrid{position:absolute;left:0;right:0;border-top:1px solid var(--line);pointer-events:none}
+.chBars{position:absolute;inset:0;display:flex;gap:2px}
+.chSlot{flex:1;min-width:0;position:relative;display:flex;align-items:flex-end;justify-content:center;border-radius:6px;outline:none}
+.chStack{width:100%;max-width:24px;display:flex;flex-direction:column-reverse}
+.chSeg{box-sizing:border-box;border-top:2px solid transparent;background-clip:padding-box;min-height:3px}
+.chSeg:last-child{border-top-left-radius:6px;border-top-right-radius:6px}
+.chSolo{width:100%;max-width:24px;border-radius:6px 6px 0 0;background:color-mix(in srgb,var(--accent) 45%,transparent);min-height:2px}
+.chSolo.hi{background:var(--accent)}
+.chVal{position:absolute;left:0;right:0;text-align:center;font-size:11px;font-weight:650;color:var(--muted);pointer-events:none}
+.chX{grid-column:2;position:relative;height:18px;margin-top:6px}
+.chX span{position:absolute;top:0;transform:translateX(-50%);font-size:11px;color:var(--muted);white-space:nowrap}
+.chLine{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.chLine path{vector-effect:non-scaling-stroke;fill:none;stroke-linejoin:round;stroke-linecap:round}
+.chLine .area{fill:color-mix(in srgb,var(--accent) 10%,transparent);stroke:none}
+.chLine .cur{stroke:var(--accent);stroke-width:2}
+.chLine .prev{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:5 4}
+.chHit{position:absolute;inset:0;outline:none;cursor:crosshair}
+.chHit:focus-visible{box-shadow:0 0 0 2px var(--accent)}
+.chCross{position:absolute;top:0;bottom:0;width:1px;background:var(--muted);opacity:.7;pointer-events:none;display:none}
+.chDot{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--accent);transform:translate(-50%,50%);
+  box-shadow:0 0 0 2px var(--surface-strong);pointer-events:none}
+.insTable{width:100%;font-size:12px;border-collapse:collapse}
+.insTable th,.insTable td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--line)}
+.insTable th:first-child,.insTable td:first-child{text-align:left}
+.insTableWrap{max-height:260px;overflow:auto}
+#donutBox{flex:1;display:flex;align-items:center}
+#insGrid .panel{display:flex;flex-direction:column}
+.donutWrap{display:flex;gap:22px;align-items:center;flex-wrap:wrap;width:100%}
+.donut{position:relative;width:150px;height:150px;flex:none}
+.donut svg{width:100%;height:100%;transform:rotate(-90deg)}
+.donut circle{fill:none;stroke-width:5.5;pointer-events:stroke}
+.donut .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none}
+.donut .mid b{font-size:22px;letter-spacing:-.02em;line-height:1.1}
+.donut .mid span{font-size:11px;color:var(--muted)}
+.catList{flex:1 1 220px;min-width:0}
+.catList .row{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.catList .row:last-child{border-bottom:none}
+.catList .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.catList .tm,.catList .pc{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.catList .pc{min-width:38px;text-align:right}
+.meter{height:10px;border-radius:6px;background:color-mix(in srgb,var(--accent) 18%,transparent);overflow:hidden;margin:12px 0 8px}
+.meter i{display:block;height:100%;border-radius:6px;background:var(--accent)}
+.bigNum{font-size:44px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.bigNum small{font-size:22px;font-weight:600;color:var(--muted);margin-left:2px}
+.hbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+.hbar:last-child{border-bottom:none}
+.hbar .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.hbar .tm{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.hbar .tr{grid-column:1 / -1;height:6px;border-radius:4px;background:color-mix(in srgb,var(--text) 7%,transparent);overflow:hidden}
+.hbar .tr i{display:block;height:100%;border-radius:4px}
+
+/* ---- settings tab ---- */
+#setWrap{display:grid;grid-template-columns:260px minmax(0,1fr);gap:var(--gap);align-items:start}
+#setMenu{position:sticky;top:104px;padding:12px}
+.setWho{display:flex;gap:11px;align-items:center;padding:4px 6px 14px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+.setWho b{display:block;font-size:14px}
+.setWho span{font-size:12px;color:var(--muted)}
+.avatar{width:42px;height:42px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;
+  color:var(--accent-text);background:linear-gradient(150deg,color-mix(in srgb,var(--accent) 80%,#fff),var(--accent))}
+.setMenuItem{display:flex;width:100%;align-items:center;gap:10px;padding:7px 10px;border:1px solid transparent;background:transparent;
+  border-radius:13px;text-align:left;font-size:13px;font-weight:600;margin-bottom:2px}
+.setMenuItem:hover{background:var(--surface2);border-color:var(--line)}
+.setMenuItem.on{background:var(--surface-strong);border-color:var(--line)}
+.setMenuItem .go{margin-left:auto;color:var(--muted);font-size:15px;line-height:1}
+.ico{flex:none;width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+.ico svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ico.c1{background:linear-gradient(150deg,#6d9bff,#3a68dc)} .ico.c2{background:linear-gradient(150deg,#ff7aa8,#e0407a)}
+.ico.c3{background:linear-gradient(150deg,#b690ff,#7d52e0)} .ico.c4{background:linear-gradient(150deg,#ffb066,#e8782a)}
+.ico.c5{background:linear-gradient(150deg,#4fd9b3,#1fa585)} .ico.c6{background:linear-gradient(150deg,#ff8a7a,#e04f4f)}
+.ico.c7{background:linear-gradient(150deg,#7fc4ff,#3b8fd9)} .ico.c8{background:linear-gradient(150deg,#a6b0c0,#6b7686)}
+.setCard{scroll-margin-top:104px;margin-bottom:var(--gap)}
+.setCard .ph{margin-bottom:4px}
+.setRow{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.setRow .tx{flex:1;min-width:0}
+.setRow .tx b{display:block;font-size:14px;font-weight:600}
+.setRow .tx span{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.setRow .ctl{flex:none;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.setRow.stk{flex-direction:column;align-items:stretch;gap:8px}
+.setRow.stk .ctl{display:block;width:100%}
+.setRow .ctl input[type=time]{width:106px}
+.setRow .ctl input[type=number]{width:84px}
+.setRow input[type=text],.setRow input[type=url],.setRow textarea{width:100%}
+.setRow .ctl button{display:inline-flex;align-items:center;gap:6px}
+.setRow .ctl button svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.setMsg{font-size:12px}
+.toggleSwitch input:focus-visible + .toggleSlider{outline:2px solid var(--accent);outline-offset:2px}
+.mgrRow{display:flex;gap:6px 8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.mgrRow input[type=text]{flex:1 1 150px;min-width:0}
+.mgrRow input[type=color]{width:40px;height:32px;flex:none}
+.mgrRow .hint{flex:none;min-width:70px;text-align:right;font-size:12px;color:var(--muted)}
+.mgrRow label{flex:none;display:flex;gap:4px;align-items:center;font-size:12px;color:var(--muted)}
+.themeGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px;padding:8px 0 4px}
+.themeTile{position:relative;padding:0;border:2px solid var(--line);border-radius:15px;overflow:hidden;display:block;cursor:pointer;text-align:center}
+.themeTile:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.themeTile:hover{border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
+.themeTile.on{border-color:var(--accent)}
+.themeTile.on::after{content:"✓";position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--accent);
+  color:var(--accent-text);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.themeTile .pvbox{display:block;color:var(--text)}
+.themeTile .pv{display:block;position:relative;height:64px;
+  background:radial-gradient(120% 90% at 0% 0%,var(--orb1),transparent 60%),radial-gradient(100% 90% at 100% 20%,var(--orb2),transparent 60%),
+    radial-gradient(120% 100% at 40% 120%,var(--orb3),transparent 60%),var(--bg)}
+.themeTile .pv i{position:absolute;background:var(--surface);border:1px solid var(--line)}
+.themeTile .pv .r{left:7px;top:7px;bottom:7px;width:12px;border-radius:7px}
+.themeTile .pv .c1{left:26px;top:7px;right:7px;height:16px;border-radius:6px}
+.themeTile .pv .c2{left:26px;top:28px;width:38%;bottom:7px;border-radius:6px}
+.themeTile .pv .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);right:12px;bottom:11px;border:none}
+.themeTile .nm{display:block;padding:6px 4px;font-size:12px;font-weight:600;background:var(--surface-strong)}
+@media(max-width:900px){
+  #setWrap{grid-template-columns:minmax(0,1fr)}
+  #setMenu{position:static;display:flex;gap:6px;overflow-x:auto;padding:8px}
+  .setWho,.setMenuItem .go{display:none}
+  .setMenuItem{width:auto;flex:none;white-space:nowrap;margin:0}
+  .setRow{flex-wrap:wrap}
+}
+main.split #setWrap{grid-template-columns:minmax(0,1fr)}
+main.split #setMenu{position:static;display:flex;gap:6px;overflow-x:auto;padding:8px}
+main.split .setWho,main.split .setMenuItem .go{display:none}
+main.split .setMenuItem{width:auto;flex:none;white-space:nowrap;margin:0}
+
 /* ---- small screens: rail becomes a bottom dock ---- */
 @media(max-width:900px){
   :root{--pad:12px}
@@ -429,15 +661,32 @@ input.scrRename{font-size:12px;padding:1px 5px;width:120px;min-width:0}
   nav h1.brand,nav .spacer,#saveDot,nav .tab .lbl{display:none}
   nav .tab{flex:none;width:46px;height:46px}
   #topbar{position:static}
-  .stripActs{border-left:none;padding-left:0;margin-left:auto}
+  /* one tidy row (timer, label, stop, sign out) and the quick timers in a swipeable row beneath it */
+  #strip{padding:8px 10px;gap:8px;border-radius:22px}
+  #strip .dot{display:none}
+  #elapsed.lcd{font-size:22px;min-width:92px;padding:3px 10px 1px;letter-spacing:2px;border-radius:11px}
+  #timerInfo{flex:1 1 0;min-width:0;padding:2px 4px}
+  #timerLabel{font-size:13px;max-width:none}
+  #timerTimes{font-size:11px}
+  #stopBtn{padding:5px 10px}
+  .stripActs{order:2;border-left:none;padding-left:0;margin-left:0}
+  .stripActs .iconBtn{width:34px;height:34px;border-radius:12px}
   #splitBtn{display:none}
-  .chips{margin-left:0;flex:1 1 100%}
+  .chips{order:3;margin-left:0;flex:1 1 100%;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;padding:5px 12px}
   #scrEditor{height:calc(100vh - 460px)}
 }
-@media(max-height:640px) and (min-width:901px){
+@media(max-height:800px) and (min-width:901px){
   nav{gap:4px;padding:12px 0}
   nav .tab{width:42px;height:42px}
   nav h1.brand{margin-bottom:6px}
+}
+@media(max-height:620px) and (min-width:901px){
+  nav{gap:2px;padding:8px 0}
+  nav .tab{width:38px;height:38px}
+  nav .tab svg{width:19px;height:19px}
+  nav h1.brand img{width:32px;height:32px}
 }
 @media print{body::before{display:none}nav,#topbar{display:none}}
 </style>
@@ -446,8 +695,10 @@ input.scrRename{font-size:12px;padding:1px 5px;width:120px;min-width:0}
 
 <nav>
   <h1 class="brand"><img src="/static/logo.svg" alt=""><span class="brandName">TimePilot</span></h1>
-  <button class="tab" data-view="board" aria-label="Board"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg><span class="lbl">Board</span></button>
-  <button class="tab" data-view="today" aria-label="Today"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="4"/><path d="M8 2v4M16 2v4M3 10h18"/></svg><span class="lbl">Today</span></button>
+  <button class="tab" data-view="dash" aria-label="Dashboard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span class="lbl">Dashboard</span></button>
+  <button class="tab" data-view="board" aria-label="Tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="m8 12.5 3 3 5-6"/></svg><span class="lbl">Tasks</span></button>
+  <button class="tab" data-view="today" aria-label="Planner"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="4"/><path d="M8 2v4M16 2v4M3 10h18"/></svg><span class="lbl">Planner</span></button>
+  <button class="tab" data-view="insights" aria-label="Insights"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-6"/></svg><span class="lbl">Insights</span></button>
   <button class="tab" data-view="notes" aria-label="Notes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span class="lbl">Notes</span></button>
   <button class="tab" data-view="snips" aria-label="Snippets"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg><span class="lbl">Snippets</span></button>
   <button class="tab" data-view="paste" aria-label="Clipboard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1.5"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg><span class="lbl">Clipboard</span></button>
@@ -455,6 +706,7 @@ input.scrRename{font-size:12px;padding:1px 5px;width:120px;min-width:0}
   <button class="tab" data-view="notif" aria-label="Notifications"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="lbl">Notifications</span></button>
   <button class="tab" data-view="export" aria-label="Export"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg><span class="lbl">Export</span></button>
   <span class="spacer"></span>
+  <button class="tab" data-view="settings" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg><span class="lbl">Settings</span></button>
   <span id="saveDot" title="save state"></span>
 </nav>
 <div class="stage">
@@ -470,14 +722,20 @@ input.scrRename{font-size:12px;padding:1px 5px;width:120px;min-width:0}
   <div class="chips" id="interruptChips"></div>
   <div class="stripActs">
     <button id="splitBtn" class="ghost" title="Pin this tab to the left half of the screen">&#9707; Split</button>
-    <button id="settingsBtn" class="ghost iconBtn" title="Settings" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg></button>
     <button id="logoutBtn" class="ghost iconBtn" title="Log out" aria-label="Log out"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
   </div>
 </div>
 </div>
 
 <main>
-  <section id="view-board" style="display:none"><div id="board"></div></section>
+  <section id="view-dash" style="display:none"></section>
+
+  <section id="view-board" style="display:none">
+    <div id="taskHead"></div>
+    <div id="taskBar" class="filterBar"></div>
+    <div id="board"></div>
+    <div id="taskList" class="panel" style="display:none"></div>
+  </section>
 
   <section id="view-today" style="display:none">
     <div class="notice" id="calNotice" style="display:none"></div>
@@ -495,6 +753,8 @@ input.scrRename{font-size:12px;padding:1px 5px;width:120px;min-width:0}
       </div>
     </div>
   </section>
+
+  <section id="view-insights" style="display:none"></section>
 
   <section id="view-notes" style="display:none">
     <div style="margin-bottom:10px;display:flex;gap:6px">
@@ -652,6 +912,8 @@ input.scrRename{font-size:12px;padding:1px 5px;width:120px;min-width:0}
       <pre id="bulkText" class="small" style="background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:10px;white-space:pre;overflow-x:auto;font-family:ui-monospace,monospace;min-height:40px"></pre>
     </div>
   </section>
+
+  <section id="view-settings" style="display:none"></section>
 </main>
 </div>
 
@@ -666,7 +928,10 @@ const $ = s => document.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2, 10);
 const THEMES = [["dark","Dark"],["light","Light"],["htb","HackTheBox"],["dracula","Dracula"],["aurora","Aurora"]];
 const FONTS = [["sans","Sans"],["mono","Mono"],["serif","Serif"]];
-const todayISO = () => new Date().toISOString().slice(0, 10);
+const pad = n => String(n).padStart(2,"0");
+// The local calendar day as YYYY-MM-DD. (toISOString() is UTC, which puts the date a day out for hours each day.)
+const isoOf = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const todayISO = () => isoOf(new Date());
 const COL_DEFAULTS = [
   {k:"today", label:"Today"},
   {k:"high",  label:"High Priority"},
@@ -736,12 +1001,12 @@ const badgeHtml = k => { const c = catColor(k);
   return `<span class="badge" style="background:${c};color:${txtOn(c)}">${esc(catName(k))}</span>`; };
 const entCat = e => e.category || (e.source==="cal" ? "meeting"
   : ((S.tasks.find(x=>x.id===e.taskId)||{}).category || defCat()));
-let view = "board", calCache = {};
+let view = "dash", calCache = {};
 
 async function loadState(){
   const r = await fetch("/api/state");
   if(r.status === 401 || r.redirected){ location.href = "/login"; return; }
-  S = await r.json(); migrateColumns(); reconcileColumns(); dailyCleanup(); applySettings(); renderAll();
+  S = await r.json(); migrateColumns(); reconcileColumns(); dailyCleanup(); seedCompleted(); applySettings(); renderAll(); loadWho();
   // Warm today's calendar in the background rather than waiting for
   // whichever tab happens to trigger the first fetch of the day (often
   // Export). The server caches raw ICS bytes for 5 minutes (CACHE_TTL in
@@ -784,12 +1049,7 @@ function persistBeacon(){
 }
 
 /* ================= helpers ================= */
-const pad = n => String(n).padStart(2,"0");
 const hmNow = () => { const d=new Date(); return pad(d.getHours())+":"+pad(d.getMinutes()); };
-// Local-date YYYY-MM-DD. Deliberately not todayISO()'s toISOString(), which
-// is UTC - that shifts the date near midnight and would put a reminder's
-// date picker on the wrong day.
-const isoOf = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const hmToMin = hm => { const [h,m]=hm.split(":").map(Number); return h*60+m; };
 const minToHM = m => pad(Math.floor(m/60))+":"+pad(m%60);
 const fmtDur = m => { m=Math.max(0,Math.round(m)); const h=Math.floor(m/60); return (h? h+"h ":"")+(m%60)+"m"; };
@@ -797,6 +1057,119 @@ const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'
 const ascii = s => String(s).replace(/[\u2010-\u2015\u2212]/g,"-").replace(/\u2026/g,"...");
 // only allow #hex / rgb() / named colours into style attributes (defence-in-depth vs hand-edited category JSON)
 const safeColor = c => (typeof c === "string" && /^(#[0-9a-fA-F]{3,8}|rgb\([\d,\s.]+\)|rgba\([\d,\s.%]+\)|[a-zA-Z]+)$/.test(c.trim())) ? c.trim() : "#888888";
+
+/* ---- calendar-day maths: dates are YYYY-MM-DD strings and the arithmetic runs in UTC, so it never shifts with the
+   browser's timezone or a DST change ---- */
+const isoAdd = (iso, n) => { const d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const isoDow = iso => (new Date(iso + "T00:00:00Z").getUTCDay() + 6) % 7;     // 0 = Mon .. 6 = Sun
+const weekStartOf = iso => isoAdd(iso, -isoDow(iso));
+const fmtDay = (iso, opts) => new Date(iso + "T12:00:00").toLocaleDateString(undefined, opts || {day:"numeric", month:"short"});
+const plural = (n, word, many) => n + " " + (n === 1 ? word : many || word + "s");
+const themeColor = name => getComputedStyle(document.body).getPropertyValue(name).trim();
+const ignoredTitles = () => (S.settings.ignoreEvents || ["Private Appointment"]).map(x=>x.toLowerCase().trim()).filter(Boolean);
+const shown = v => v === view || v === pinnedView();
+// Re-render whichever of these views is on screen (one or both panes). Settings is left out on purpose: it edits in place.
+function redraw(...ids){ ids.forEach(v => { if(shown(v)) renderView(v); }); }
+
+// Feather-style 24px outlines, used by the page headers and the settings tab.
+const ICON = {
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  check:'<path d="M5 12.5l4.5 4.5L19 7"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  palette:'<circle cx="13.5" cy="6.5" r=".6"/><circle cx="17.5" cy="10.5" r=".6"/><circle cx="8.5" cy="7.5" r=".6"/><circle cx="6.5" cy="12.5" r=".6"/><path d="M12 2a10 10 0 1 0 0 20c.9 0 1.5-.7 1.5-1.5 0-.4-.1-.7-.4-1-.3-.3-.4-.6-.4-1 0-.8.7-1.5 1.5-1.5H16a6 6 0 0 0 6-6c0-4.4-4.5-8-10-8z"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  alarm:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M5 3 2 6M19 3l3 3"/>',
+  bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
+  board:'<rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/>',
+  calendar:'<rect x="3" y="4" width="18" height="17" rx="4"/><path d="M8 2v4M16 2v4M3 10h18"/>',
+  db:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  type:'<path d="M4 7V5h16v2M9 19h6M12 5v14"/>',
+  coffee:'<path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM17 10h2a2 2 0 0 1 0 4h-2M7 2v2M11 2v2M15 2v2"/>',
+  tag:'<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1"/>',
+  link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3A4 4 0 0 0 13 5.3l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/>',
+  send:'<path d="m22 2-7 20-4-9-9-4zM22 2 11 13"/>',
+  download:'<path d="M12 3v12M7 10l5 5 5-5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>',
+  upload:'<path d="M12 15V3M7 8l5-5 5 5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>',
+};
+const svgIcon = n => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[n]}</svg>`;
+
+/* ---- one tooltip for every chart. Text goes in through textContent, never innerHTML: series names are the user's own
+   category and task titles. ---- */
+const tip = (() => {
+  const el = document.createElement("div");
+  el.id = "tip"; el.setAttribute("role", "tooltip"); document.body.appendChild(el);
+  const row = ([color, label, value]) => {
+    const r = document.createElement("div"); r.className = "tr";
+    if(color){ const i = document.createElement("i"); i.style.background = safeColor(color); r.appendChild(i); }
+    const l = document.createElement("span"), v = document.createElement("b");
+    l.textContent = label; v.textContent = value; r.append(l, v); return r;
+  };
+  return {
+    show(x, y, head, rows){
+      el.textContent = "";
+      if(head){ const h = document.createElement("div"); h.className = "th"; h.textContent = head; el.appendChild(h); }
+      (rows || []).forEach(r => el.appendChild(row(r)));
+      el.style.display = "block";
+      const w = el.offsetWidth, h = el.offsetHeight;
+      let left = x + 14, top = y + 14;
+      if(left + w > window.innerWidth - 8) left = x - w - 14;
+      if(top + h > window.innerHeight - 8) top = y - h - 14;
+      el.style.left = Math.max(8, left) + "px"; el.style.top = Math.max(8, top) + "px";
+    },
+    hide(){ el.style.display = "none"; },
+  };
+})();
+// get(event) -> [heading, [[colour|null, label, value], ...]]. Shows on hover and on keyboard focus.
+function tipOn(node, get){
+  const at = e => { const [h, r] = get(e); tip.show(e.clientX, e.clientY, h, r); };
+  node.addEventListener("pointerenter", at);
+  node.addEventListener("pointermove", at);
+  node.addEventListener("pointerleave", tip.hide);
+  node.addEventListener("focus", () => {
+    const b = node.getBoundingClientRect(), x = b.left + b.width / 2, y = b.top;
+    const [h, r] = get({clientX:x, clientY:y}); tip.show(x, y, h, r);
+  });
+  node.addEventListener("blur", tip.hide);
+}
+
+/* ---- finished tasks ----
+   A task leaves the board the day after it is done, so every completion is also written to S.completed. The
+   Dashboard and Insights count from that, not from the board. */
+function recordDone(t){
+  const list = S.completed = S.completed || [];
+  const r = list.find(x => x.taskId === t.id);
+  if(r){ r.title = t.title; r.category = t.category; r.est = t.est || 30; return; }
+  list.push({id:uid(), taskId:t.id, title:t.title, category:t.category, est:t.est || 30, date:t.doneAt || todayISO()});
+}
+function unrecordDone(t){ if(S.completed) S.completed = S.completed.filter(x => x.taskId !== t.id); }
+// Every column change goes through here, so slot, doneAt and the completion record can't drift apart.
+function moveTask(t, key){
+  const first = firstColK(), doneK = doneColK(), wasDone = !!doneK && t.column === doneK;
+  t.column = key;
+  if(key !== first) t.slot = null;
+  if(doneK && key === doneK){ t.doneAt = t.doneAt || todayISO(); recordDone(t); }
+  else { t.doneAt = null; if(wasDone) unrecordDone(t); }
+}
+// Tasks already sitting in the done column when this version first loads have no record yet.
+function seedCompleted(){
+  if(!Array.isArray(S.completed)) S.completed = [];
+  const doneK = doneColK(); if(!doneK) return;
+  S.tasks.forEach(t => {
+    if(t.column === doneK && t.doneAt && !S.completed.some(x => x.taskId === t.id)){ recordDone(t); markDirty(); }
+  });
+}
+
+/* ---- time totals ----
+   A calendar meeting is in the log with its scheduled times (importCalToLog), so one later today would count in full
+   before it has happened. Today's totals take only the part that has elapsed. */
+function loggedMin(e, today, nowM){
+  if(e.date !== today || e.source !== "cal") return e.minutes;
+  const s = hmToMin(e.start), en = hmToMin(e.end);
+  return nowM >= en ? e.minutes : Math.max(0, nowM - s);
+}
 
 /* ================= settings/theme ================= */
 function applySettings(){
@@ -811,17 +1184,17 @@ function applySettings(){
 function startTimer(label, taskId, category){
   stopTimer();
   S.activeTimer = { label, taskId: taskId || null, category: category || null, start: new Date().toISOString() };
-  markDirty(); renderStrip();
+  markDirty(); renderStrip(); redraw("dash");
 }
 function stopTimer(){
   if(!S.activeTimer) return;
   const t = S.activeTimer, start = new Date(t.start), end = new Date();
   const mins = Math.max(1, Math.round((end - start)/60000));
   const cat = t.category || ((S.tasks.find(x=>x.id===t.taskId)||{}).category) || defCat();
-  S.timelog.push({ id:uid(), date: start.toISOString().slice(0,10), label:t.label, taskId:t.taskId, category:cat,
+  S.timelog.push({ id:uid(), date: isoOf(start), label:t.label, taskId:t.taskId, category:cat,
     start: pad(start.getHours())+":"+pad(start.getMinutes()), end: hmNow(), minutes: mins });
   S.activeTimer = null;
-  markDirty(); renderStrip(); if(view==="export") renderExport();
+  markDirty(); renderStrip(); if(view==="export") renderExport(); redraw("dash", "insights");
 }
 function renderStrip(){
   const strip = $("#strip"), t = S.activeTimer;
@@ -904,7 +1277,7 @@ async function editTimerModal(){
     row.style.display = "none";
     if(!val || val === oldStartHM){ note.textContent = ""; return; }
     if(S.settings.syncLastTaskEnd === false){
-      note.textContent = "Previous-entry syncing is off (Settings → Categories & timers).";
+      note.textContent = "Previous-entry syncing is off (Settings → Board & categories).";
       note.className = "small muted"; return;
     }
     const last = lastTimelogEntryToday();
@@ -963,10 +1336,7 @@ function interruptModal(name){
 let _tickDay = todayISO();
 function tick(){
   const d = todayISO();
-  if(S && d !== _tickDay){ _tickDay = d; dailyCleanup();
-    const shown = [view, pinnedView()];
-    if(shown.includes("board")) renderBoard();
-    if(shown.includes("today")) renderToday(); }
+  if(S && d !== _tickDay){ _tickDay = d; dailyCleanup(); redraw("board", "today", "dash", "insights"); }
   const t = S && S.activeTimer;
   if(!t){ $("#elapsed").textContent = "00:00"; $("#timerTimes").textContent = ""; return; }
   const st = new Date(t.start);
@@ -980,25 +1350,114 @@ setInterval(tick, 1000);
 $("#stopBtn").onclick = stopTimer;
 
 /* ================= board ================= */
-function renderBoard(){
+/* ================= tasks: board + list ================= */
+let taskCat = "", taskQ = "", taskSort = {k:"col", dir:1};
+const taskMatches = t => (!taskCat || t.category === taskCat) && (!taskQ || (t.title + " " + (t.details || "")).toLowerCase().includes(taskQ));
+const taskMode = () => S.settings.taskView === "list" ? "list" : "board";
+// A task changed: redraw everything that shows tasks (the Dashboard's counts, Insights' completions, the Planner).
+const afterTaskChange = () => redraw("board", "dash", "today", "insights");
+
+// Header, summary tiles and filters are built once per visit (so typing in the filter box keeps its focus);
+// renderTaskBody() redraws just the board or list underneath.
+function renderTasks(){
+  if(taskCat && !getCats().some(c => c.k === taskCat)) taskCat = "";
+  tip.hide();
+  const doneK = doneColK(), first = firstColK(), mode = taskMode();
+  const open = S.tasks.filter(t => t.column !== doneK), wk = weekStartOf(todayISO());
+  const doneWeek = (S.completed || []).filter(c => c.date >= wk).length;
+  const estMin = open.reduce((a, t) => a + (t.est || 30), 0), inFirst = S.tasks.filter(t => t.column === first).length;
+  const cats = new Set(open.map(t => t.category)).size;
+  $("#taskHead").innerHTML = `<div class="pageHead"><div class="grow"><h2>Tasks</h2>
+      <div class="sub">${plural(open.length, "task")} open${cats ? " across " + plural(cats, "category", "categories") : ""}</div></div>
+      <div class="acts"><div class="seg" role="group" aria-label="Layout">
+        <button data-mode="board" class="${mode === "board" ? "on" : ""}" aria-pressed="${mode === "board"}">${svgIcon("grid")} Board</button>
+        <button data-mode="list" class="${mode === "list" ? "on" : ""}" aria-pressed="${mode === "list"}">${svgIcon("list")} List</button></div>
+        <button class="primary big" data-act="new">${svgIcon("plus")} New task</button></div></div>
+    <div class="statRow">
+      <div class="stat"><div class="k">Open</div><div class="v">${open.length}</div></div>
+      <div class="stat"><div class="k">${esc(colLabel(first))}</div><div class="v">${inFirst}</div></div>
+      <div class="stat"><div class="k">Done this week</div><div class="v">${doneWeek}</div></div>
+      <div class="stat"><div class="k">Estimated time</div><div class="v">${esc(fmtDur(estMin))}</div></div></div>`;
+  $("#taskBar").innerHTML = `<select id="tfCat" aria-label="Category"><option value="">All categories</option>
+      ${getCats().map(c => `<option value="${esc(String(c.k))}"${taskCat === c.k ? " selected" : ""}>${esc(c.label)}</option>`).join("")}</select>
+    <input id="tfQ" type="search" placeholder="Filter by title or details" aria-label="Filter tasks" value="${esc(taskQ)}">`;
+  $("#tfCat").onchange = e => { taskCat = e.target.value; renderTaskBody(); };
+  $("#tfQ").oninput = e => { taskQ = e.target.value.trim().toLowerCase(); renderTaskBody(); };
+  $("#taskHead").onclick = e => {
+    const b = e.target.closest("button"); if(!b) return;
+    if(b.dataset.act === "new") taskModal(null);
+    else if(b.dataset.mode && b.dataset.mode !== mode){ S.settings.taskView = b.dataset.mode; markDirty(); renderTasks(); }
+  };
+  renderTaskBody();
+}
+function renderTaskBody(){
+  const list = taskMode() === "list";
+  $("#board").style.display = list ? "none" : "";
+  $("#taskList").style.display = list ? "" : "none";
+  if(list) drawTaskList(); else drawBoard();
+}
+
+function drawBoard(){
   const board = $("#board"); board.innerHTML = "";
-  const first = firstColK(), doneK = doneColK();
-  getCols().forEach(({k:key,label})=>{
+  const first = firstColK();
+  getCols().forEach(({k:key, label}) => {
     const col = document.createElement("div"); col.className = "col"; col.dataset.col = key;
-    const tasks = S.tasks.filter(t=>t.column===key);
-    col.innerHTML = `<h2>${esc(label)}<span><button class="ghost small" title="Add task with full details" style="padding:1px 8px;margin-right:6px">＋</button><span class="muted">${tasks.length}</span></span></h2>`;
+    const tasks = S.tasks.filter(t => t.column === key && taskMatches(t));
+    col.innerHTML = `<h2>${esc(label)}<span><button class="ghost small" title="Add task with full details" aria-label="Add task to ${esc(label)}" style="padding:1px 8px;margin-right:6px">＋</button><span class="muted">${tasks.length}</span></span></h2>`;
     col.querySelector("h2 button").onclick = () => taskModal(null, key);
     tasks.forEach(t => col.appendChild(cardEl(t)));
     col.ondragover = e => { e.preventDefault(); col.classList.add("dragover"); };
     col.ondragleave = () => col.classList.remove("dragover");
-    col.ondrop = e => { e.preventDefault(); col.classList.remove("dragover");
-      const t = S.tasks.find(x=>x.id===e.dataTransfer.getData("id"));
-      if(t){ t.column = key; if(key!==first) t.slot=null;
-        t.doneAt = key===doneK ? todayISO() : null;
-        markDirty(); renderBoard(); } };
+    col.ondrop = e => {
+      e.preventDefault(); col.classList.remove("dragover");
+      const t = S.tasks.find(x => x.id === e.dataTransfer.getData("id"));
+      if(t && t.column !== key){ moveTask(t, key); markDirty(); afterTaskChange(); }
+    };
     board.appendChild(col);
   });
 }
+
+const TASK_SORTS = {
+  col:   (a, b, ix) => ix[a.t.column] - ix[b.t.column] || a.i - b.i,
+  title: (a, b) => a.t.title.localeCompare(b.t.title),
+  cat:   (a, b) => catName(a.t.category).localeCompare(catName(b.t.category)),
+  est:   (a, b) => (a.t.est || 30) - (b.t.est || 30),
+};
+function drawTaskList(){
+  const box = $("#taskList"), cols = getCols(), doneK = doneColK();
+  const ix = Object.fromEntries(cols.map((c, i) => [c.k, i]));
+  const rows = S.tasks.map((t, i) => ({t, i})).filter(r => taskMatches(r.t));
+  rows.sort((a, b) => (TASK_SORTS[taskSort.k](a, b, ix) || a.i - b.i) * taskSort.dir);
+  const th = (k, label, cls) => k
+    ? `<th class="${taskSort.k === k ? "sorted" : ""}" data-sort="${k}" aria-sort="${taskSort.k === k ? (taskSort.dir > 0 ? "ascending" : "descending") : "none"}">${label}${taskSort.k === k ? (taskSort.dir > 0 ? " ▲" : " ▼") : ""}</th>`
+    : `<th class="noSort ${cls || ""}">${label}</th>`;
+  box.innerHTML = rows.length ? `<table id="taskTable"><thead><tr>${doneK ? '<th class="noSort" style="width:34px"></th>' : ""}${th("title", "Task")}${th("cat", "Category")}${th("col", "Status")}${th("est", "Est.")}${th(null, "Slot")}<th class="noSort"></th></tr></thead>
+    <tbody>${rows.map(({t}) => {
+      const isDone = doneK && t.column === doneK;
+      return `<tr data-id="${esc(t.id)}"${isDone ? ' class="done"' : ""}>
+        ${doneK ? `<td><button class="chk${isDone ? " on" : ""}" data-act="toggle" aria-label="${isDone ? "Mark not done" : "Mark done"}: ${esc(t.title)}">${svgIcon("check")}</button></td>` : ""}
+        <td><div class="tt">${esc(t.title)}${t.details ? ' <span class="hasDet" title="Has details">📝</span>' : ""}</div></td>
+        <td>${badgeHtml(t.category)}</td>
+        <td><select data-act="status" aria-label="Status of ${esc(t.title)}">${cols.map(c => `<option value="${esc(c.k)}"${t.column === c.k ? " selected" : ""}>${esc(c.label)}</option>`).join("")}</select></td>
+        <td class="num">${esc(String(t.est || 30))}m</td><td class="num">${t.slot ? esc(String(t.slot)) : ""}</td>
+        <td class="acts"><button data-act="start" title="Start timer" aria-label="Start timer: ${esc(t.title)}">▶</button> <button data-act="edit" title="Edit" aria-label="Edit: ${esc(t.title)}">✎</button></td></tr>`;
+    }).join("")}</tbody></table>` : `<div class="emptyNote">No tasks match.</div>`;
+  box.onclick = e => {
+    const h = e.target.closest("th[data-sort]");
+    if(h){ const k = h.dataset.sort; taskSort = {k, dir: taskSort.k === k ? -taskSort.dir : 1}; drawTaskList(); return; }
+    const b = e.target.closest("button[data-act]"), tr = e.target.closest("tr[data-id]");
+    const t = tr && S.tasks.find(x => x.id === tr.dataset.id); if(!b || !t) return;
+    if(b.dataset.act === "start") startTimer(t.title, t.id);
+    else if(b.dataset.act === "edit") taskModal(t);
+    else if(b.dataset.act === "toggle"){ moveTask(t, t.column === doneK ? firstColK() : doneK); markDirty(); afterTaskChange(); }
+  };
+  box.onchange = e => {
+    const s = e.target.closest("select[data-act=status]"), tr = e.target.closest("tr[data-id]");
+    const t = s && tr && S.tasks.find(x => x.id === tr.dataset.id);
+    if(t){ moveTask(t, s.value); markDirty(); afterTaskChange(); }
+  };
+}
+
 // Slots are for one day only. slotDay records when a task was slotted, so a
 // task left unfinished doesn't reappear at the same time tomorrow. Tasks
 // slotted before slotDay existed are stamped today rather than wiped, so
@@ -1050,31 +1509,34 @@ function taskModal(t, col){
   const save = () => {
     const title = $("#mTitle").value.trim();
     if(!title){ alert("Title is required."); return; }
-    t.title = title; t.category = $("#mCat").value;
-    t.column = $("#mCol").value; t.est = +$("#mEst").value || 30;
+    t.title = title; t.category = $("#mCat").value; t.est = +$("#mEst").value || 30;
     // Stored only when non-blank, so tasks without details stay as they were
     // and the board's 📝 indicator is a plain truthiness check.
     const details = $("#mDetails").value.replace(/\s+$/,"");
     if(details.trim()) t.details = details; else delete t.details;
-    if(t.column !== firstColK()) t.slot = null;
-    t.doneAt = t.column===doneColK() ? (t.doneAt || todayISO()) : null;
-    if(isNew) S.tasks.push({id:uid(), ...t});
-    markDirty(); closeModal(); renderBoard(); if(view==="today") renderToday();
+    if(isNew){ t.id = uid(); S.tasks.push(t); }
+    moveTask(t, $("#mCol").value);
+    markDirty(); closeModal(); afterTaskChange();
   };
   $("#mSave").onclick = save;
   $("#mTitle").onkeydown = e => { if(e.key==="Enter") save(); };
-  if(!isNew) $("#mDel").onclick = () => { S.tasks = S.tasks.filter(x=>x.id!==t.id); markDirty(); closeModal(); renderBoard(); if(view==="today") renderToday(); };
+  if(!isNew) $("#mDel").onclick = () => { S.tasks = S.tasks.filter(x=>x.id!==t.id); markDirty(); closeModal(); afterTaskChange(); };
   $("#mCancel").onclick = closeModal;
   if(isNew) setTimeout(()=>$("#mTitle").focus(), 50);
 }
 
 /* ================= today ================= */
+const calInflight = {};
 async function fetchCal(d, force){
   if(!force && calCache[d]) return calCache[d];
-  const r = await fetch(`/api/calendar?date=${d}${force?"&refresh=1":""}`);
-  const j = await r.json();
-  if(j.error) return calCache[d] = {events:[], error:j.error};
-  return calCache[d] = j;
+  if(!force && calInflight[d]) return calInflight[d];
+  return calInflight[d] = (async () => {
+    try {
+      const r = await fetch(`/api/calendar?date=${d}${force?"&refresh=1":""}`);
+      const j = await r.json();
+      return calCache[d] = j.error ? {events:[], error:j.error} : j;
+    } finally { delete calInflight[d]; }
+  })();
 }
 async function renderToday(force){
   const cal = await fetchCal(todayISO(), force);
@@ -1151,7 +1613,7 @@ async function renderToday(force){
     put(Math.max(lunchStartM,viewStartM), Math.min(lunchEndM,viewEndM)-Math.max(lunchStartM,viewStartM),
       "lunch", `<span class="t">Lunch</span>`);
   }
-  const ignoreEv = (S.settings.ignoreEvents || ["Private Appointment"]).map(x=>x.toLowerCase().trim()).filter(Boolean);
+  const ignoreEv = ignoredTitles();
   const timedEvents = cal.events.filter(e=>!e.allDay && !ignoreEv.includes((e.title||"").toLowerCase().trim()));
   const todayTasks = S.tasks.filter(t=>t.column===firstColK());
   const slottedTasks = todayTasks.filter(t=>t.slot);
@@ -1730,7 +2192,7 @@ async function importCalToLog(d){
   $("#expNotice").style.display = cal.warn ? "" : "none";
   if(cal.warn) $("#expNotice").textContent = "Calendar: "+cal.warn;
   let changed = false;
-  const ignore = (S.settings.ignoreEvents || ["Private Appointment"]).map(x=>x.toLowerCase().trim()).filter(Boolean);
+  const ignore = ignoredTitles();
   (cal.events||[]).filter(e=>!e.allDay).forEach(ev=>{
     if(ignore.includes((ev.title||"").toLowerCase().trim())) return;   // skip ignored event titles
     const key = ev.start + "|" + ev.title;
@@ -2036,7 +2498,7 @@ function renderNotif(){
   const warn = $("#remWarn");
   if(!ntfyConfigured()){
     warn.style.display = ""; warn.className = "small warnBox";
-    warn.innerHTML = `No ntfy topic configured - reminders won't be delivered. Set one in <strong>⚙ Settings → Notifications &amp; ntfy</strong>.`;
+    warn.innerHTML = `No ntfy topic configured - reminders won't be delivered. Set one in <strong>Settings → Push notifications</strong>.`;
   } else warn.style.display = "none";
   renderRemList();
 }
@@ -2175,275 +2637,681 @@ async function pushNtfy(message, title, tag, priority){
   } catch(e){ /* offline or server down - the pop-up already showed */ }
 }
 
-/* ================= settings modal ================= */
-$("#settingsBtn").onclick = () => {
+/* ================= dashboard ================= */
+let whoName = "";
+function loadWho(){
+  fetch("/api/whoami").then(r => r.ok ? r.json() : null).then(j => {
+    if(j && typeof j.username === "string"){
+      whoName = j.username; redraw("dash");
+      if(shown("settings") && !(document.activeElement && document.activeElement.closest("#view-settings"))) renderSettings();   // not under a half-typed edit
+    }
+  }).catch(() => {});
+}
+const greeting = () => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"; };
+
+// Length of the working day in minutes (work hours less lunch) - the target the "tracked" ring fills towards.
+function workMinutes(){
   const s = S.settings;
-  const sec = (title, body, open) =>
-    `<details class="setSec"${open?" open":""}><summary>${title}</summary><div class="setSecBody">${body}</div></details>`;
-  openModal(`<h3>Settings</h3><div id="setBody">
-    ${sec("Appearance", `
-      <div class="fRow"><label>Theme</label><select id="sTheme">
-        ${THEMES.map(([k,l])=>`<option value="${k}"${s.theme===k?" selected":""}>${l}</option>`).join("")}</select></div>
-      <div class="fRow"><label>Font</label><select id="sFont">
-        ${FONTS.map(([k,l])=>`<option value="${k}"${s.font===k?" selected":""}>${l}</option>`).join("")}</select></div>`, true)}
-    ${sec("Hours &amp; day", `
-      <div class="fRow"><label>Work hours</label>
-        <div style="display:flex;gap:8px">
-          <input id="sStart" type="time" value="${esc(String(s.dayStart))}"><input id="sEnd" type="time" value="${esc(String(s.dayEnd))}">
-        </div>
-        <span class="small muted">Used for "Auto"-slotting tasks and the day's default range.</span></div>
-      <div class="fRow"><label>Calendar display range</label>
-        <div style="display:flex;gap:8px">
-          <input id="sViewStart" type="time" value="${esc(String(s.viewStart||""))}"><input id="sViewEnd" type="time" value="${esc(String(s.viewEnd||""))}">
-        </div>
-        <span class="small muted">What the Today timeline actually shows - leave blank to match work hours. Widen this to see/drag tasks into early mornings or evenings without changing what "Auto" treats as normal hours.</span></div>
-      <div class="fRow"><label>Lunch break (optional)</label>
-        <div style="display:flex;gap:8px">
-          <input id="sLunchStart" type="time" value="${esc(String(s.lunchStart||""))}"><input id="sLunchEnd" type="time" value="${esc(String(s.lunchEnd||""))}">
-        </div>
-        <span class="small muted">"Auto" will skip over this window. Leave both blank for no lunch block.</span></div>
-      <div class="fRow"><label>Round export durations to (minutes)</label><input id="sRound" type="number" min="1" value="${esc(String(s.rounding||5))}"></div>`)}
-    ${sec("Reminders", `
-      <div class="fRow"><label>Slotted-task reminders</label>
-        <div style="display:flex;gap:10px;align-items:center">
-          <label class="small"><input type="checkbox" id="sRemind"${s.remind!==false?" checked":""}> enabled</label>
-          <input id="sLead" type="number" min="0" max="120" value="${esc(String(s.remindLead||0))}" style="width:70px">
-          <span class="small muted">min before slot time</span>
-        </div></div>
-      <div class="fRow"><label>Calendar meeting reminders</label>
-        <label class="small"><input type="checkbox" id="sRemindMeetings"${s.remindMeetings?" checked":""}> enabled</label>
-        <span class="small muted">Also remind you before calendar meetings start, using the same lead time as above. Ignored-event titles are skipped.</span></div>
-      <div class="fRow"><label>Browser notifications</label>
-        <div style="display:flex;gap:10px;align-items:center">
-          <label class="small"><input type="checkbox" id="sBrowserNotif"${s.browserNotifications?" checked":""}> enabled</label>
-          <span class="small muted" id="notifPermNote"></span>
-        </div>
-        <span class="small muted">Also fires a system notification when a reminder is due - useful if the tab isn't in front. Needs your browser's permission.</span></div>`)}
-    ${sec("Notifications &amp; ntfy", `
-      <div class="fRow"><label>ntfy server URL</label>
-        <input id="sNtfyUrl" value="${esc(s.ntfyUrl||"https://ntfy.sh")}" placeholder="https://ntfy.sh">
-        <span class="small muted">Public ntfy.sh, or your own self-hosted server.</span></div>
-      <div class="fRow"><label>Topic</label>
-        <input id="sNtfyTopic" value="${esc(s.ntfyTopic||"")}" placeholder="my-timepilot-a7f3c2">
-        <span class="small muted">Anyone who knows a topic name can read and post to it - use something long and unguessable, and subscribe to it in the ntfy app.</span></div>
-      <div class="fRow"><label>Notification icon URL (optional)</label>
-        <input id="sNtfyIcon" value="${esc(s.ntfyIcon||"")}" placeholder="https://example.com/icon.png">
-        <span class="small muted">A .png URL shown as the notification's icon.</span></div>
-      <div class="fRow"><label>Push task &amp; meeting reminders to ntfy</label>
-        <label class="small"><input type="checkbox" id="sNtfyTasks"${s.ntfyTasks?" checked":""}> enabled</label>
-        <span class="small muted">Sends an ntfy push alongside each pop-up reminder above. Needs a tab open - scheduled reminders on the <strong>Notifications</strong> tab are sent by the server and don't.</span></div>
-      <div class="fRow"><label>Quick-pick tags (up to 10)</label>
-        <input id="sQuickTags" value="${(s.quickTags&&s.quickTags.length?s.quickTags:DEFAULT_QUICK_TAGS).map(t=>NTFY_TAG_EMOJI[t]||"").join("")}"
-          placeholder="Paste up to 10 emoji, e.g. ⏰📬🚨📅💻🔐🗑️🍃😊✅">
-        <div class="quickTagRow" id="sQuickPreview"></div>
-        <span class="small muted">Shown as quick buttons on the Notifications tab's Tag field. Unrecognized emoji are skipped.</span></div>
-      <div class="fRow">
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <button id="sNtfyTest" type="button">Send test notification</button>
-          <span class="small muted" id="sNtfyStatus"></span>
-        </div></div>`)}
-    ${sec("Categories &amp; timers", `
-      <div class="fRow"><label>Board columns (up to ${COL_MAX})</label><div id="sCols"></div>
-        <button id="sColAdd" class="ghost small" type="button">+ Add column</button>
-        <span class="small muted">The first column is the one the Today tab pulls its tasks from.
-        Ticking "clears daily" marks the column whose cards are deleted the next day - untick them
-        all to keep cards indefinitely. Deleting a column moves its tasks to the first column.</span></div>
-      <div class="fRow"><label>Task categories</label><div id="sCats"></div>
-        <button id="sCatAdd" class="ghost small" type="button">+ Add category</button></div>
-      <div class="fRow"><label>Interrupt quick-timers (one per line)</label><textarea id="sInt" rows="4">${esc((s.interrupts||[]).join("\n"))}</textarea></div>
-      <div class="fRow"><label>Forgot to hit Start?</label>
-        <label class="small"><input type="checkbox" id="sSyncLastEnd"${s.syncLastTaskEnd!==false?" checked":""}> when I correct a timer's start time, adjust the previous task to match</label>
-        <span class="small muted">Backdating a timer's start (via the running-timer label → edit) moves the previous logged task's end time to line up with it, so there's no unlogged gap between them. Only ever pulls that boundary - it won't touch anything else in the timesheet.</span></div>`)}
-    ${sec("Calendar", `
-      <div class="fRow"><label>Exchange published calendar ICS URL</label><input id="sIcs" value="${esc(s.icsUrl||"")}" placeholder="https://outlook.office365.com/owa/calendar/.../calendar.ics"></div>
-      <div class="fRow"><label>...or upload a .ics file (used as fallback if the URL is empty or unreachable)</label>
-        <input type="file" id="sIcsFile" accept=".ics,text/calendar">
-        <span class="small muted" id="sIcsStatus"></span></div>
-      <div class="fRow"><label>Ignore calendar events with these titles (one per line - not logged)</label><textarea id="sIgnore" rows="2">${esc((s.ignoreEvents||["Private Appointment"]).join("\n"))}</textarea></div>`)}
-    ${sec("Backup", `
-      <div class="fRow"><label>Export / import</label>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <button id="sExport" type="button">⬇ Export data</button>
-          <label class="ghost small" style="padding:5px 10px;border:1px solid var(--line);border-radius:7px;cursor:pointer">
-            ⬆ Import data<input type="file" id="sImportFile" accept=".json,application/json" style="display:none">
-          </label>
-          <span class="small muted" id="sImportStatus"></span>
-        </div>
-        <span class="small muted">Export downloads a JSON file with all your tasks, notes, snippets, clipboard items, scratchpad, reminders, and settings. Import <strong>replaces</strong> everything currently in your account with the contents of a previously exported file.</span></div>`)}
+  let m = Math.max(0, hmToMin(s.dayEnd || "18:00") - hmToMin(s.dayStart || "08:00"));
+  if(s.lunchStart && s.lunchEnd) m -= Math.max(0, hmToMin(s.lunchEnd) - hmToMin(s.lunchStart));
+  return Math.max(60, m);
+}
+// Everything logged today plus the running timer. A timer left running overnight only counts from midnight.
+function trackedToday(){
+  const today = todayISO(), nowM = hmToMin(hmNow());
+  let m = 0;
+  S.timelog.forEach(e => { if(e.date === today) m += loggedMin(e, today, nowM); });
+  if(S.activeTimer){
+    const midnight = new Date(); midnight.setHours(0, 0, 0, 0);
+    m += Math.max(0, (Date.now() - Math.max(new Date(S.activeTimer.start), midnight)) / 60000);
+  }
+  return m;
+}
+// Today's meetings (from the calendar cache) and slotted tasks as one time-ordered list.
+function todayAgenda(){
+  const cal = calCache[todayISO()] || {events:[]}, ignore = ignoredTitles(), items = [];
+  (cal.events || []).forEach(ev => {
+    if(ev.allDay || ignore.includes((ev.title || "").toLowerCase().trim())) return;
+    const s = new Date(ev.start), en = new Date(ev.end), startM = s.getHours() * 60 + s.getMinutes();
+    items.push({kind:"cal", title:ev.title || "(no title)", loc:ev.location || "", startM, endM:Math.max(startM, en.getHours() * 60 + en.getMinutes())});
+  });
+  S.tasks.forEach(t => {
+    if(t.column === firstColK() && t.slot){ const s = hmToMin(t.slot); items.push({kind:"task", title:t.title, startM:s, endM:s + (t.est || 30)}); }
+  });
+  return items.sort((a, b) => a.startM - b.startM || a.endM - b.endM);
+}
+const bySlot = (a, b) => (a.slot ? 0 : 1) - (b.slot ? 0 : 1) || (a.slot || "").localeCompare(b.slot || "");
+const ringArc = (r, pct, color) => `<circle cx="60" cy="60" r="${r}" class="trk"/>` + (pct > 0
+  ? `<circle cx="60" cy="60" r="${r}" pathLength="100" stroke-dasharray="${Math.min(100, pct).toFixed(2)} 100" transform="rotate(-90 60 60)" style="stroke:${color}"/>` : "");
+
+function renderDash(){
+  drawDash();
+  const d = todayISO();
+  if(!calCache[d]) fetchCal(d).then(() => redraw("dash")).catch(() => {});   // meetings arrive after the first paint
+}
+function drawDash(){
+  const sec = $("#view-dash");
+  tip.hide();
+  const today = todayISO(), nowM = hmToMin(hmNow()), first = firstColK(), doneK = doneColK();
+  const agenda = todayAgenda(), meetings = agenda.filter(i => i.kind === "cal"), upcoming = agenda.filter(i => i.endM > nowM);
+  const meetingsLeft = meetings.filter(i => i.endM > nowM), nextMeeting = meetingsLeft[0];
+  const planned = S.tasks.filter(t => t.column === first), done = S.completed || [];
+  const doneNow = done.filter(c => c.date === today).length, planTotal = planned.length + doneNow;
+  const tracked = trackedToday(), target = workMinutes(), meetPast = meetings.length - meetingsLeft.length;
+  const pct = (a, b) => b > 0 ? a / b * 100 : 0;
+  const name = whoName ? whoName.charAt(0).toUpperCase() + whoName.slice(1) : "";
+
+  const nx = upcoming[0];
+  const hero = nx ? `<div class="nextHero"><div class="when">${nx.startM > nowM ? "in " + fmtDur(nx.startM - nowM) : "Now"}</div>
+      <div class="name">${esc(nx.title)}</div>
+      <div class="meta">${minToHM(nx.startM)} – ${minToHM(nx.endM)} · ${nx.kind === "cal" ? "Meeting" : "Task"}${nx.loc ? " · " + esc(nx.loc) : ""}</div></div>` : "";
+  const later = upcoming.slice(1, 6).map(i => `<div class="agendaItem"><span class="bar" style="background:${i.kind === "cal" ? "var(--muted)" : "var(--accent)"}"></span>
+      <span class="nm">${esc(i.title)}</span><span class="tm">${minToHM(i.startM)}</span></div>`).join("");
+  const agendaHtml = nx ? hero + later : `<div class="emptyNote">Nothing else scheduled today.</div>`;
+
+  const rows = [...planned.slice().sort(bySlot), ...(doneK ? S.tasks.filter(t => t.column === doneK && t.doneAt === today) : [])];
+  const taskRows = rows.slice(0, 8).map(t => {
+    const isDone = doneK && t.column === doneK;
+    return `<div class="taskRow${isDone ? " done" : ""}">
+      ${doneK ? `<button class="chk${isDone ? " on" : ""}" data-act="toggle" data-id="${esc(t.id)}" aria-label="${isDone ? "Mark not done" : "Mark done"}: ${esc(t.title)}">${svgIcon("check")}</button>` : ""}
+      <div class="main"><div class="ti">${esc(t.title)}</div>
+        <div class="mt"><span class="catDot" style="background:${catColor(t.category)}"></span><span>${esc(catName(t.category))}</span><span>${esc(String(t.est || 30))}m</span>${t.slot ? `<span>@${esc(t.slot)}</span>` : ""}</div></div>
+      ${isDone ? "" : `<button class="go" data-act="start" data-id="${esc(t.id)}" title="Start timer" aria-label="Start timer: ${esc(t.title)}">▶</button>`}</div>`;
+  }).join("");
+  const moreTasks = rows.length > 8 ? `<div class="emptyNote">+ ${rows.length - 8} more - <button class="linkBtn" data-act="tasks">see all tasks</button></div>` : "";
+
+  // This week, Monday to Sunday: tasks finished per day, set against last week up to the same weekday.
+  const wk = weekStartOf(today), dow = isoDow(today), prevWk = isoAdd(wk, -7), prevSame = isoAdd(prevWk, dow);
+  const days = Array.from({length:7}, (_, i) => isoAdd(wk, i)), perDay = days.map(() => 0);
+  let lastWeek = 0;
+  done.forEach(c => {
+    const i = days.indexOf(c.date);
+    if(i >= 0) perDay[i]++; else if(c.date >= prevWk && c.date <= prevSame) lastWeek++;
+  });
+  const weekDone = perDay.reduce((a, b) => a + b, 0), maxDay = Math.max(1, ...perDay);
+  const wkDelta = lastWeek > 0 ? Math.round((weekDone - lastWeek) / lastWeek * 100) : null;
+  const byCat = {};
+  S.timelog.forEach(e => { if(e.date >= wk && e.date <= isoAdd(wk, 6)){ const k = entCat(e); byCat[k] = (byCat[k] || 0) + loggedMin(e, today, nowM); } });
+  const catRows = Object.entries(byCat).filter(([, m]) => m > 0).sort((a, b) => b[1] - a[1]), weekMin = catRows.reduce((a, [, m]) => a + m, 0);
+  const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const bars = days.map((d, i) => `<div class="barSlot${i === dow ? " now" : ""}${i > dow ? " future" : ""}" tabindex="0" data-i="${i}" style="--h:${(perDay[i] / maxDay * 76).toFixed(1)}%"
+      aria-label="${dayNames[i]}: ${perDay[i]} finished"><span class="bv">${i <= dow ? perDay[i] : ""}</span><span class="bar1"></span></div>`).join("");
+
+  sec.innerHTML = `<div class="pageHead">
+      <div class="grow"><h2>${greeting()}${name ? ", " + esc(name) : ""}</h2>
+        <div class="sub">${esc(new Date().toLocaleDateString(undefined, {weekday:"long", day:"numeric", month:"long"}))} · ${plural(meetingsLeft.length, "meeting")} and ${plural(planned.length, "task")} left today</div></div>
+      <div class="acts"><button class="big" data-act="new">${svgIcon("plus")} New task</button>
+        ${nextMeeting ? `<button class="primary big" data-act="planner">${nextMeeting.startM > nowM ? "Next: " + minToHM(nextMeeting.startM) : "Now: " + esc(nextMeeting.title.slice(0, 24))}</button>` : ""}</div></div>
+    <div class="statRow">
+      <div class="stat"><div class="k">Done today</div><div class="v">${doneNow}<small>/ ${planTotal}</small></div></div>
+      <div class="stat"><div class="k">Tracked today</div><div class="v">${esc(fmtDur(tracked))}</div></div>
+      <div class="stat"><div class="k">Meetings left</div><div class="v">${meetingsLeft.length}</div></div>
+      <div class="stat"><div class="k">Open tasks</div><div class="v">${S.tasks.filter(t => t.column !== doneK).length}</div></div></div>
+    <div id="dashGrid">
+      <div class="panel"><div class="ph"><div><div class="t">Today</div><div class="s">Close your rings</div></div></div>
+        <div class="ringWrap">
+          <svg class="rings" viewBox="0 0 120 120" role="img" aria-label="Tasks ${doneNow} of ${planTotal}, tracked ${esc(fmtDur(tracked))} of ${esc(fmtDur(target))}, meetings ${meetPast} of ${meetings.length}">
+            ${ringArc(52, pct(doneNow, planTotal), "var(--accent)")}${ringArc(40, pct(tracked, target), "var(--ok)")}${ringArc(28, pct(meetPast, meetings.length), "var(--cat-change)")}</svg>
+          <div class="ringLeg">
+            <div class="li"><span class="bar" style="background:var(--accent)"></span><div><div class="n">${doneNow} <small>/ ${planTotal}</small></div><div class="l">Tasks done</div></div></div>
+            <div class="li"><span class="bar" style="background:var(--ok)"></span><div><div class="n">${esc(fmtDur(tracked))} <small>/ ${esc(fmtDur(target))}</small></div><div class="l">Tracked</div></div></div>
+            <div class="li"><span class="bar" style="background:var(--cat-change)"></span><div><div class="n">${meetPast} <small>/ ${meetings.length}</small></div><div class="l">Meetings attended</div></div></div></div></div></div>
+      <div class="panel"><div class="ph"><div><div class="t">Up next</div><div class="s">Meetings and slotted tasks</div></div><div class="r"><button class="linkBtn" data-act="planner">Planner</button></div></div>${agendaHtml}</div>
+      <div class="panel"><div class="ph"><div><div class="t">My tasks</div><div class="s">${esc(colLabel(first))} column</div></div><div class="r"><button class="linkBtn" data-act="tasks">All tasks</button></div></div>
+        ${taskRows ? taskRows + moreTasks : `<div class="emptyNote">Nothing in ${esc(colLabel(first))}. Add a task, or drag one over on the board.</div>`}</div>
+      <div class="panel"><div class="ph"><div><div class="t">This week</div><div class="s">Tasks you finished</div></div></div>
+        <div class="weekHero"><span class="big">${weekDone}</span><span class="what">finished so far</span>
+          ${wkDelta === null ? "" : `<span class="delta ${wkDelta > 0 ? "up" : wkDelta < 0 ? "down" : ""}">${wkDelta > 0 ? "▲" : wkDelta < 0 ? "▼" : "■"} ${Math.abs(wkDelta)}% vs last week</span>`}</div>
+        <div class="barRow" role="group" aria-label="Tasks finished each day this week">${bars}</div>
+        <div class="barLbls">${dayNames.map((n, i) => `<span${i === dow ? ' class="now"' : ""}>${n}</span>`).join("")}</div>
+        ${weekMin ? `<div class="stackBar" role="img" aria-label="Time tracked this week by category">${catRows.map(([k, m]) => `<span style="flex:${m};background:${chartColor(k)}" title="${esc(catName(k))}"></span>`).join("")}</div>
+          <div class="leg"><span>Tracked <b>${esc(fmtDur(weekMin))}</b> this week</span>${catRows.slice(0, 4).map(([k, m]) => `<span><i style="background:${chartColor(k)}"></i>${esc(catName(k))} <b>${esc(fmtDur(m))}</b></span>`).join("")}</div>` : ""}</div>
+    </div>`;
+
+  sec.querySelectorAll(".barSlot").forEach(el => {
+    const i = +el.dataset.i;
+    tipOn(el, () => [fmtDay(days[i], {weekday:"long", day:"numeric", month:"short"}), [[themeColor("--accent"), "Finished", String(perDay[i])]]]);
+  });
+  sec.onclick = e => {
+    const b = e.target.closest("[data-act]"); if(!b) return;
+    const act = b.dataset.act;
+    if(act === "new") taskModal(null);
+    else if(act === "tasks") setView("board");
+    else if(act === "planner") setView("today");
+    else {
+      const t = S.tasks.find(x => x.id === b.dataset.id); if(!t) return;
+      if(act === "start") startTimer(t.title, t.id);
+      else if(doneK){ moveTask(t, t.column === doneK ? first : doneK); markDirty(); redraw("dash", "board", "today", "insights"); }
+    }
+  };
+}
+// The countdown and the rings move with the clock, so redraw once a minute while the dashboard is up.
+setInterval(() => {
+  if(S && shown("dash") && !$("#modal").classList.contains("open") && !(document.activeElement && document.activeElement.closest("#view-dash"))) drawDash();
+}, 60000);
+
+/* ================= insights ================= */
+const INS_PERIODS = [[7, "7D"], [30, "30D"], [90, "90D"], [365, "1Y"]];
+let insDays = 30;
+const insTable = {time:false, done:false};
+// Charts draw each category in its own colour; calendar meetings (a built-in pseudo-category) in neutral grey.
+const chartColor = k => k === "meeting" ? safeColor(themeColor("--muted") || "#888888") : catColor(k);
+const OTHER = "__other";
+const fmtHrs = m => (m / 60).toFixed(1) + "h";
+
+function niceScale(max, ticks){
+  if(!(max > 0)) return {max:1, step:1};
+  const raw = max / ticks, mag = Math.pow(10, Math.floor(Math.log10(raw))), n = raw / mag;
+  const step = (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * mag;
+  return {step, max: Math.ceil(max / step - 1e-9) * step};
+}
+// Time axis in minutes up to 3h, in hours above that. Returns {max, ticks:[{v, label}]} (v in minutes).
+function timeAxis(maxMin){
+  const hours = maxMin > 180, k = hours ? 60 : 1, sc = niceScale(maxMin / k, 4), ticks = [];
+  for(let i = 0, n = Math.round(sc.max / sc.step); i <= n; i++){
+    const v = i * sc.step;
+    ticks.push({v: v * k, label: hours ? (Number.isInteger(+v.toFixed(6)) ? v : v.toFixed(1)) + "h" : Math.round(v) + "m"});
+  }
+  return {max: sc.max * k, ticks};
+}
+function countAxis(maxV){
+  const step = Math.max(1, Math.ceil(niceScale(Math.max(maxV, 1), 4).step)), max = Math.max(step, Math.ceil(maxV / step) * step), ticks = [];
+  for(let v = 0; v <= max; v += step) ticks.push({v, label:String(v)});
+  return {max, ticks};
+}
+
+// Everything the page shows, for the `days` ending today and the same number of days before that.
+function insightsData(days){
+  const today = todayISO(), nowM = hmToMin(hmNow());
+  const start = isoAdd(today, -(days - 1)), step = days <= 31 ? 1 : 7;
+  // Buckets are days (up to a month) or 7-day blocks counted back from today; the oldest block may be shorter.
+  const buckets = [];
+  for(let end = today; end >= start; end = isoAdd(end, -step)) buckets.unshift({from: isoAdd(end, -(step - 1)) < start ? start : isoAdd(end, -(step - 1)), to: end});
+  const idx = {}, pidx = {}, dowCount = Array(7).fill(0);
+  buckets.forEach((b, i) => { for(let d = b.from; d <= b.to; d = isoAdd(d, 1)){ idx[d] = i; pidx[isoAdd(d, -days)] = i; dowCount[isoDow(d)]++; } });
+  const n = buckets.length, perCat = {}, byTask = new Map(), byDow = Array(7).fill(0), active = new Set();
+  let tracked = 0, meet = 0, pTracked = 0, pMeet = 0;
+  S.timelog.forEach(e => {
+    const i = idx[e.date];
+    if(i !== undefined){
+      const m = loggedMin(e, today, nowM); if(m <= 0) return;
+      const k = entCat(e), c = perCat[k] = perCat[k] || {k, min:0, per:Array(n).fill(0)};
+      c.min += m; c.per[i] += m; tracked += m; byDow[isoDow(e.date)] += m; active.add(e.date);
+      if(e.source === "cal") meet += m;
+      const key = e.taskId ? "t:" + e.taskId : "l:" + (e.label || "").toLowerCase(), t = byTask.get(key) || {label:e.label || "(untitled)", k, min:0};
+      t.min += m; byTask.set(key, t);
+    } else if(pidx[e.date] !== undefined){
+      pTracked += e.minutes; if(e.source === "cal") pMeet += e.minutes;
+    }
+  });
+  const actual = {};
+  S.timelog.forEach(e => { if(e.taskId) actual[e.taskId] = (actual[e.taskId] || 0) + e.minutes; });
+  const done = Array(n).fill(0), pdone = Array(n).fill(0), est = {n:0, within:0, sumEst:0, sumAct:0, rows:[]};
+  let doneN = 0, pDoneN = 0;
+  (S.completed || []).forEach(c => {
+    if(idx[c.date] !== undefined){
+      done[idx[c.date]]++; doneN++;
+      const act = c.taskId && actual[c.taskId];
+      if(act > 0){ est.n++; est.sumEst += c.est; est.sumAct += act; if(act <= c.est * 1.1) est.within++; est.rows.push({title:c.title, est:c.est, act}); }
+    } else if(pidx[c.date] !== undefined){ pdone[pidx[c.date]]++; pDoneN++; }
+  });
+  // Biggest categories first; past eight, the tail folds into "Other" rather than inventing more colours.
+  let cats = Object.values(perCat).sort((a, b) => b.min - a.min);
+  if(cats.length > 8){
+    const rest = cats.slice(7), other = {k:OTHER, min:0, per:Array(n).fill(0)};
+    rest.forEach(c => { other.min += c.min; c.per.forEach((v, i) => other.per[i] += v); });
+    cats = [...cats.slice(0, 7), other];
+  }
+  cats.forEach(c => { c.label = c.k === OTHER ? "Other" : catName(c.k); c.color = c.k === OTHER ? "#7c8594" : chartColor(c.k); });
+  const totals = buckets.map((_, i) => cats.reduce((a, c) => a + c.per[i], 0));
+  return {days, buckets, cats, totals, tracked, meet, pTracked, pMeet, done, pdone, doneN, pDoneN, est, activeDays:active.size,
+    dowAvg: byDow.map((m, i) => dowCount[i] ? m / dowCount[i] : 0), top: [...byTask.values()].sort((a, b) => b.min - a.min).slice(0, 6)};
+}
+
+const bucketTitle = b => b.from === b.to ? fmtDay(b.from, {weekday:"short", day:"numeric", month:"short"}) : fmtDay(b.from) + " – " + fmtDay(b.to);
+const deltaHtml = (cur, prev, goodUp) => {
+  if(!(prev > 0)) return "";
+  const p = Math.round((cur - prev) / prev * 100), cls = !goodUp || p === 0 ? "" : p > 0 ? "up" : "down";
+  return `<div class="d ${cls}">${p > 0 ? "▲" : p < 0 ? "▼" : "■"} ${Math.abs(p)}% vs previous ${insDays === 365 ? "year" : insDays + " days"}</div>`;
+};
+const axisHtml = ax => ax.ticks.map(t => `<span style="bottom:${(t.v / ax.max * 100).toFixed(2)}%">${t.label}</span>`).join("");
+const gridHtml = ax => ax.ticks.filter(t => t.v > 0).map(t => `<div class="chGrid" style="bottom:${(t.v / ax.max * 100).toFixed(2)}%"></div>`).join("");
+const xLabelsHtml = buckets => buckets.map((b, i) => `<span style="left:${((i + .5) / buckets.length * 100).toFixed(2)}%">${esc(fmtDay(b.from))}</span>`).join("");
+
+function timeChartHtml(d){
+  const ax = timeAxis(Math.max(...d.totals, 1));
+  const slots = d.buckets.map((b, i) => {
+    const tot = d.totals[i];
+    const segs = d.cats.map(c => c.per[i] > 0 ? `<div class="chSeg" style="height:${(c.per[i] / tot * 100).toFixed(2)}%;background-color:${c.color}"></div>` : "").join("");
+    return `<div class="chSlot" data-i="${i}"${d.buckets.length <= 31 ? ' tabindex="0"' : ""} aria-label="${esc(bucketTitle(b))}: ${tot ? esc(fmtDur(tot)) : "nothing tracked"}">${tot ? `<div class="chStack" style="height:${(tot / ax.max * 100).toFixed(2)}%">${segs}</div>` : ""}</div>`;
+  }).join("");
+  return `<div class="ch" style="--chh:220px"><div class="chY">${axisHtml(ax)}</div><div class="chPlot">${gridHtml(ax)}<div class="chBars">${slots}</div></div><div class="chX">${xLabelsHtml(d.buckets)}</div></div>`;
+}
+function bindTimeTips(root, d){
+  root.querySelectorAll("#chTime .chSlot").forEach(el => {
+    const i = +el.dataset.i;
+    tipOn(el, () => {
+      const rows = d.cats.filter(c => c.per[i] > 0).map(c => [c.color, c.label, fmtDur(c.per[i])]);
+      if(rows.length > 1) rows.push([null, "Total", fmtDur(d.totals[i])]);
+      return [bucketTitle(d.buckets[i]), rows.length ? rows : [[null, "Nothing tracked", ""]]];
+    });
+  });
+}
+function doneChartHtml(d){
+  const n = d.buckets.length, ax = countAxis(Math.max(...d.done, ...d.pdone, 1));
+  const X = i => (i + .5) / n * 100, Y = v => 100 - v / ax.max * 100;
+  const path = arr => "M" + arr.map((v, i) => X(i).toFixed(2) + "," + Y(v).toFixed(2)).join(" L");
+  const last = d.done[n - 1];
+  return `<div class="ch" style="--chh:200px"><div class="chY">${axisHtml(ax)}</div><div class="chPlot">${gridHtml(ax)}
+    <svg class="chLine" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <path class="area" d="${path(d.done)} L${X(n - 1).toFixed(2)},100 L${X(0).toFixed(2)},100 Z"/><path class="prev" d="${path(d.pdone)}"/><path class="cur" d="${path(d.done)}"/></svg>
+    <span class="chDot" style="left:${X(n - 1).toFixed(2)}%;bottom:${(last / ax.max * 100).toFixed(2)}%"></span><div class="chCross"></div>
+    <div class="chHit" tabindex="0" role="img" aria-label="Tasks finished per ${d.days <= 31 ? "day" : "week"}, this period against the one before. Use the arrow keys to step through, or switch to the table."></div></div>
+    <div class="chX">${xLabelsHtml(d.buckets)}</div></div>`;
+}
+function bindDoneTips(root, d){
+  const hit = root.querySelector("#chDone .chHit"), cross = root.querySelector("#chDone .chCross"); if(!hit) return;
+  const n = d.buckets.length; let cur = n - 1;
+  const show = (i, x, y) => {
+    cur = Math.max(0, Math.min(n - 1, i));
+    cross.style.display = "block"; cross.style.left = ((cur + .5) / n * 100) + "%";
+    tip.show(x, y, bucketTitle(d.buckets[cur]), [[themeColor("--accent"), "This period", String(d.done[cur])], [themeColor("--muted"), "Previous", String(d.pdone[cur])]]);
+  };
+  const at = e => { const r = hit.getBoundingClientRect(); show(Math.floor((e.clientX - r.left) / r.width * n), e.clientX, e.clientY); };
+  hit.addEventListener("pointermove", at); hit.addEventListener("pointerenter", at);
+  const off = () => { cross.style.display = "none"; tip.hide(); };
+  hit.addEventListener("pointerleave", off); hit.addEventListener("blur", off);
+  const atCur = () => { const r = hit.getBoundingClientRect(); show(cur, r.left + (cur + .5) / n * r.width, r.top); };
+  hit.addEventListener("focus", atCur);
+  hit.addEventListener("keydown", e => {
+    if(e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault(); cur = Math.max(0, Math.min(n - 1, cur + (e.key === "ArrowRight" ? 1 : -1))); atCur();
+  });
+}
+function donutHtml(d){
+  if(!d.tracked) return `<div class="emptyNote">Nothing tracked in this period.</div>`;
+  let cum = 0;
+  const arcs = d.cats.map((c, i) => {
+    const pct = c.min / d.tracked * 100, len = Math.max(0, pct - .7), at = cum; cum += pct;
+    return len > 0 ? `<circle cx="21" cy="21" r="15.9155" data-i="${i}" stroke="${c.color}" stroke-dasharray="${len.toFixed(2)} ${(100 - len).toFixed(2)}" stroke-dashoffset="${(-at).toFixed(2)}"/>` : "";
+  }).join("");
+  return `<div class="donutWrap"><div class="donut"><svg viewBox="0 0 42 42" role="img" aria-label="Time by category">${arcs}</svg>
+      <div class="mid"><b>${esc(fmtDur(d.tracked))}</b><span>tracked</span></div></div>
+    <div class="catList">${d.cats.map(c => `<div class="row"><span class="catDot" style="background:${c.color}"></span><span class="nm">${esc(c.label)}</span>
+      <span class="tm">${esc(fmtDur(c.min))}</span><span class="pc">${Math.round(c.min / d.tracked * 100)}%</span></div>`).join("")}</div></div>`;
+}
+function estimateHtml(d){
+  const e = d.est;
+  if(!e.n) return `<div class="emptyNote">Needs finished tasks that you timed with the ▶ button - estimates are compared with the time logged against each one.</div>`;
+  const pct = Math.round(e.within / e.n * 100), ratio = Math.round(e.sumAct / e.sumEst * 100);
+  const over = e.rows.filter(r => r.act > r.est * 1.1).sort((a, b) => (b.act - b.est) - (a.act - a.est)).slice(0, 3);
+  return `<div class="bigNum">${pct}<small>%</small></div>
+    <div class="meter" role="img" aria-label="${pct}% of finished tasks came in within estimate"><i style="width:${pct}%"></i></div>
+    <div class="muted small">${e.within} of ${plural(e.n, "finished task")} took no longer than estimated (10% grace). Overall you used <b>${ratio}%</b> of the time you set aside.</div>
+    ${over.length ? `<div class="ph" style="margin:14px 0 2px"><div class="s">Biggest overruns</div></div>` + over.map(r => `<div class="hbar"><span class="nm">${esc(r.title)}</span><span class="tm">${esc(fmtDur(r.est))} → ${esc(fmtDur(r.act))}</span></div>`).join("") : ""}`;
+}
+function topHtml(d){
+  if(!d.top.length) return `<div class="emptyNote">Nothing tracked in this period.</div>`;
+  const max = d.top[0].min;
+  return d.top.map(t => `<div class="hbar"><span class="nm">${esc(t.label)}</span><span class="tm">${esc(fmtDur(t.min))}</span>
+    <span class="tr"><i style="width:${(t.min / max * 100).toFixed(1)}%;background:${chartColor(t.k)}"></i></span></div>`).join("");
+}
+function rhythmHtml(d){
+  const max = Math.max(...d.dowAvg), ax = timeAxis(Math.max(max, 1)), names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  if(!d.tracked) return `<div class="emptyNote">Nothing tracked in this period.</div>`;
+  const slots = d.dowAvg.map((m, i) => `<div class="chSlot" data-i="${i}" tabindex="0" aria-label="${names[i]}: ${esc(fmtDur(m))} on average">
+    <span class="chVal" style="bottom:calc(${(m / ax.max * 100).toFixed(2)}% + 4px)">${m > 0 ? fmtHrs(m) : ""}</span>
+    <div class="chSolo${m === max ? " hi" : ""}" style="height:${(m / ax.max * 100).toFixed(2)}%"></div></div>`).join("");
+  return `<div class="ch" style="--chh:200px" id="chDow"><div class="chY">${axisHtml(ax)}</div><div class="chPlot">${gridHtml(ax)}<div class="chBars">${slots}</div></div>
+    <div class="chX">${names.map((n, i) => `<span style="left:${((i + .5) / 7 * 100).toFixed(2)}%">${n}</span>`).join("")}</div></div>`;
+}
+function tableHtml(head, rows){
+  return `<div class="insTableWrap"><table class="insTable"><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(r => `<tr>${r.map(c => `<td>${esc(String(c))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+// Show every Nth x label, N chosen from the widest label and the room per bucket (known only once the plot is on
+// screen), counted back from the newest so the latest label always shows.
+function thinXLabels(root){
+  root.querySelectorAll(".chX").forEach(box => {
+    const spans = [...box.querySelectorAll("span")]; if(!spans.length) return;
+    const w = Math.max(...spans.map(sp => sp.getBoundingClientRect().width)), slot = box.getBoundingClientRect().width / spans.length;
+    const stride = slot > 0 ? Math.max(1, Math.ceil((w + 10) / slot)) : 1;
+    spans.forEach((sp, i) => { sp.style.visibility = (spans.length - 1 - i) % stride ? "hidden" : ""; });
+  });
+}
+
+function renderInsights(){
+  tip.hide();
+  const sec = $("#view-insights"), d = insightsData(insDays);
+  const label = insDays === 365 ? "year" : insDays + " days", weekly = insDays > 31;
+  const avgDay = d.activeDays ? d.tracked / d.activeDays : 0, estPct = d.est.n ? Math.round(d.est.within / d.est.n * 100) : null;
+  const toggle = k => `<button class="ghost small" data-tbl="${k}" aria-pressed="${insTable[k]}">${insTable[k] ? "Chart" : "Table"}</button>`;
+  const timeBody = !d.tracked ? `<div class="emptyNote">Nothing tracked in this period.</div>` : insTable.time
+    ? tableHtml(["Period", ...d.cats.map(c => c.label), "Total"], d.buckets.map((b, i) => [bucketTitle(b), ...d.cats.map(c => fmtDur(c.per[i])), fmtDur(d.totals[i])]))
+    : `<div id="chTime">${timeChartHtml(d)}</div><div class="leg">${d.cats.map(c => `<span><i style="background:${c.color}"></i>${esc(c.label)}</span>`).join("")}</div>`;
+  const doneBody = insTable.done
+    ? tableHtml(["Period", "This period", "Previous"], d.buckets.map((b, i) => [bucketTitle(b), d.done[i], d.pdone[i]]))
+    : `<div id="chDone">${doneChartHtml(d)}</div><div class="leg"><span><i class="solid"></i>This period</span><span><i class="dash"></i>Previous ${label}</span></div>`;
+  sec.innerHTML = `<div class="pageHead"><div class="grow"><h2>Insights</h2><div class="sub">How your time and tasks went over the last ${label}</div></div>
+      <div class="acts"><div class="seg" role="group" aria-label="Period">${INS_PERIODS.map(([n, l]) => `<button data-days="${n}" class="${n === insDays ? "on" : ""}" aria-pressed="${n === insDays}">${l}</button>`).join("")}</div></div></div>
+    <div class="statRow">
+      <div class="stat"><div class="k">Time tracked</div><div class="v">${esc(fmtDur(d.tracked))}</div>${deltaHtml(d.tracked, d.pTracked, false)}</div>
+      <div class="stat"><div class="k">Tasks finished</div><div class="v">${d.doneN}</div>${deltaHtml(d.doneN, d.pDoneN, true)}</div>
+      <div class="stat"><div class="k">In meetings</div><div class="v">${esc(fmtDur(d.meet))}</div>${d.tracked ? `<div class="d">${Math.round(d.meet / d.tracked * 100)}% of tracked time</div>` : ""}</div>
+      <div class="stat"><div class="k">Average active day</div><div class="v">${esc(fmtDur(avgDay))}</div><div class="d">${plural(d.activeDays, "active day")}</div></div>
+      <div class="stat"><div class="k">Within estimate</div><div class="v">${estPct === null ? "–" : estPct + "<small>%</small>"}</div>${d.est.n ? `<div class="d">${plural(d.est.n, "task")} compared</div>` : ""}</div></div>
+    <div id="insGrid">
+      <div class="panel wide"><div class="ph"><div><div class="t">Time tracked</div><div class="s">${weekly ? "Per week" : "Per day"}, by category</div></div><div class="r">${toggle("time")}</div></div>${timeBody}</div>
+      <div class="panel"><div class="ph"><div><div class="t">By category</div><div class="s">Where the time went</div></div></div><div id="donutBox">${donutHtml(d)}</div></div>
+      <div class="panel"><div class="ph"><div><div class="t">Estimate accuracy</div><div class="s">Estimate against time logged</div></div></div>${estimateHtml(d)}</div>
+      <div class="panel wide"><div class="ph"><div><div class="t">Tasks finished</div><div class="s">${weekly ? "Per week" : "Per day"}, against the previous ${label}</div></div><div class="r">${toggle("done")}</div></div>${doneBody}</div>
+      <div class="panel"><div class="ph"><div><div class="t">Top tasks</div><div class="s">By time logged</div></div></div>${topHtml(d)}</div>
+      <div class="panel"><div class="ph"><div><div class="t">Weekday rhythm</div><div class="s">Average tracked time per weekday</div></div></div>${rhythmHtml(d)}</div></div>`;
+  sec.onclick = e => {
+    const b = e.target.closest("button"); if(!b) return;
+    if(b.dataset.days){ insDays = +b.dataset.days; renderInsights(); }
+    else if(b.dataset.tbl){ insTable[b.dataset.tbl] = !insTable[b.dataset.tbl]; renderInsights(); }
+  };
+  bindTimeTips(sec, d); bindDoneTips(sec, d);
+  sec.querySelectorAll("#donutBox circle").forEach(c => {
+    const cat = d.cats[+c.dataset.i];
+    tipOn(c, () => [cat.label, [[cat.color, fmtDur(cat.min), Math.round(cat.min / d.tracked * 100) + "%"]]]);
+  });
+  sec.querySelectorAll("#chDow .chSlot").forEach(el => {
+    const i = +el.dataset.i;
+    tipOn(el, () => [["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][i], [[themeColor("--accent"), "Average", fmtDur(d.dowAvg[i])]]]);
+  });
+  thinXLabels(sec);
+}
+
+/* ================= settings tab =================
+   Every control applies as you change it (the debounced save in markDirty() persists it), so there is no Save button. */
+const SET_SECTIONS = [
+  ["account", "Account", "user", "c1"], ["appearance", "Appearance", "palette", "c3"], ["hours", "Hours &amp; day", "clock", "c4"],
+  ["reminders", "Reminders", "alarm", "c2"], ["ntfy", "Push notifications", "bell", "c7"], ["board", "Board &amp; categories", "board", "c5"],
+  ["calendar", "Calendar", "calendar", "c6"], ["data", "Data &amp; backup", "db", "c8"],
+];
+const sIco = (name, cls) => `<span class="ico ${cls}">${svgIcon(name)}</span>`;
+const sTx = (title, desc, msgId) => `<div class="tx"><b>${title}</b>${desc ? `<span>${desc}</span>` : ""}${msgId ? `<span class="setMsg" id="${msgId}"></span>` : ""}</div>`;
+const sRow = (ico, cls, title, desc, ctl, msgId) => `<div class="setRow">${sIco(ico, cls)}${sTx(title, desc, msgId)}<div class="ctl">${ctl}</div></div>`;
+const sRowCol = (ico, cls, title, desc, body) => `<div class="setRow stk"><div style="display:flex;gap:12px;align-items:center">${sIco(ico, cls)}${sTx(title, desc)}</div><div class="ctl">${body}</div></div>`;
+const sSwitch = (id, on, label) => `<label class="toggleSwitch"><input type="checkbox" id="${id}"${on ? " checked" : ""} aria-label="${label}"><span class="toggleSlider"></span></label>`;
+const sCard = (id, title, sub, body) => `<section class="panel setCard" id="set-${id}"><div class="ph"><div><div class="t">${title}</div><div class="s">${sub}</div></div></div>${body}</section>`;
+const timePair = (a, b, va, vb) => `<input id="${a}" type="time" value="${esc(String(va || ""))}" aria-label="From"><span class="muted small">to</span><input id="${b}" type="time" value="${esc(String(vb || ""))}" aria-label="To">`;
+const clampInt = (v, lo, hi, d) => { const n = Math.round(+v); return n >= lo && n <= hi ? n : d; };
+
+// Apply a change to the settings. Other panes (in split view) pick it up straight away.
+function setS(patch, opts){
+  Object.assign(S.settings, patch);
+  if(opts && opts.cal) calCache = {};
+  markDirty(); applySettings(); redraw("dash", "board", "today", "insights");
+}
+
+function renderSettings(){
+  tip.hide();
+  const s = S.settings, sec = $("#view-settings");
+  const initial = (whoName || "?").charAt(0).toUpperCase();
+  const quick = (s.quickTags && s.quickTags.length ? s.quickTags : DEFAULT_QUICK_TAGS).map(t => NTFY_TAG_EMOJI[t] || "").join("");
+
+  const themeTiles = THEMES.map(([k, l]) => `<div class="themeTile${s.theme === k ? " on" : ""}" data-pick="${k}" role="radio" tabindex="0" aria-checked="${s.theme === k}" aria-label="${l} theme">
+      <span class="pvbox" data-theme="${k}"><span class="pv"><i class="r"></i><i class="c1"></i><i class="c2"></i><i class="dot"></i></span><span class="nm">${l}</span></span></div>`).join("");
+  const fontSeg = `<div class="seg" id="sFontSeg" role="group" aria-label="Font">${FONTS.map(([k, l]) => `<button data-font="${k}" class="${s.font === k ? "on" : ""}" aria-pressed="${s.font === k}">${l}</button>`).join("")}</div>`;
+
+  sec.innerHTML = `<div class="pageHead"><div class="grow"><h2>Settings</h2><div class="sub">Your account, the look of TimePilot, and when it nudges you. Changes save as you make them.</div></div></div>
+  <div id="setWrap">
+    <div class="panel" id="setMenu" role="navigation" aria-label="Settings sections">
+      <div class="setWho"><span class="avatar">${esc(initial)}</span><div><b>${esc(whoName || "Account")}</b><span>TimePilot</span></div></div>
+      ${SET_SECTIONS.map(([id, label, icon, cls], i) => `<button class="setMenuItem${i === 0 ? " on" : ""}" data-sec="${id}">${sIco(icon, cls)}<span>${label}</span><span class="go">›</span></button>`).join("")}
     </div>
-    <div class="mActions"><button id="mCancel">Cancel</button><button class="primary" id="mSave">Save</button></div>`);
-  $("#modalBox").classList.add("settings");
-  $("#sTheme").onchange = e => document.body.dataset.theme = e.target.value;
-  $("#sFont").onchange = e => document.body.dataset.font = e.target.value;
-  // --- ntfy test: posts the values currently in the form, so you can verify
-  // before committing them with Save ---
-  $("#sNtfyTest").onclick = async () => {
-    const st = $("#sNtfyStatus");
-    if(!$("#sNtfyTopic").value.trim()){ st.textContent = "Set a topic first"; st.className = "small errText"; return; }
-    st.textContent = "Sending..."; st.className = "small muted";
-    try {
-      const r = await fetch("/api/ntfy/send", {method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ message:"TimePilot test notification - if you can read this, it works.",
-          title:"TimePilot", tag:"white_check_mark",
-          ntfyUrl:$("#sNtfyUrl").value.trim(), ntfyTopic:$("#sNtfyTopic").value.trim(),
-          ntfyIcon:$("#sNtfyIcon").value.trim() })});
-      const j = await r.json().catch(()=>({}));
-      if(r.ok){ st.textContent = "Sent ✓ check your device"; st.className = "small muted"; }
-      else { st.textContent = j.error || "Send failed"; st.className = "small errText"; }
-    } catch(e){ st.textContent = "Send failed"; st.className = "small errText"; }
+    <div id="setCards">
+    ${sCard("account", "Account", "Who you're signed in as",
+      `<div class="setRow"><span class="avatar">${esc(initial)}</span>${sTx(esc(whoName || "Signed in"), "Your tasks, notes and history are private to this account.")}<div class="ctl"><button id="sLogout">${svgIcon("logout")} Sign out</button></div></div>`)}
+    ${sCard("appearance", "Appearance", "The whole app re-tints through its glass",
+      sRowCol("palette", "c3", "Theme", "Pick a look", `<div class="themeGrid" role="radiogroup" aria-label="Theme">${themeTiles}</div>`) +
+      sRow("type", "c1", "Font", "Typeface used everywhere", fontSeg))}
+    ${sCard("hours", "Hours &amp; day", "Shapes the Planner, Auto-slotting and your daily targets",
+      sRow("clock", "c4", "Work hours", "Bounds Auto-slotting and sets the tracked-time target", timePair("sStart", "sEnd", s.dayStart, s.dayEnd), "sHoursMsg") +
+      sRow("calendar", "c1", "Planner display range", "What the Planner timeline shows. Blank matches work hours; widen it to place tasks out of hours.", timePair("sViewStart", "sViewEnd", s.viewStart, s.viewEnd), "sViewMsg") +
+      sRow("coffee", "c6", "Lunch break", "Auto-slotting skips this window. Leave both blank for none.", timePair("sLunchStart", "sLunchEnd", s.lunchStart, s.lunchEnd), "sLunchMsg") +
+      sRow("clock", "c5", "Round durations to", "Export durations round to this many minutes", `<input id="sRound" type="number" min="1" max="1440" value="${esc(String(s.rounding || 5))}" aria-label="Minutes"><span class="muted small">min</span>`))}
+    ${sCard("reminders", "Reminders", "Pop-ups while a TimePilot tab is open",
+      sRow("alarm", "c2", "Slotted-task reminders", "Remind me before a slotted task is due", `${sSwitch("sRemind", s.remind !== false, "Slotted-task reminders")}<input id="sLead" type="number" min="0" max="120" value="${esc(String(s.remindLead || 0))}" aria-label="Minutes before"><span class="muted small">min before</span>`) +
+      sRow("calendar", "c3", "Meeting reminders", "Also remind before calendar meetings, using the same lead time", sSwitch("sRemindMeetings", !!s.remindMeetings, "Meeting reminders")) +
+      sRow("bell", "c4", "Browser notifications", `Show a system notification too, for when the tab isn't in front <span id="notifPermNote"></span>`, sSwitch("sBrowserNotif", !!s.browserNotifications, "Browser notifications")))}
+    ${sCard("ntfy", "Push notifications", "Send reminders to your phone with ntfy",
+      sRowCol("link", "c7", "Server URL", "ntfy.sh, or your own self-hosted server", `<input id="sNtfyUrl" type="url" value="${esc(s.ntfyUrl || "https://ntfy.sh")}" placeholder="https://ntfy.sh">`) +
+      sRowCol("tag", "c3", "Topic", "Anyone who knows a topic name can read and post to it - use something long and unguessable, and subscribe to it in the ntfy app.", `<input id="sNtfyTopic" type="text" value="${esc(s.ntfyTopic || "")}" placeholder="my-timepilot-a7f3c2" autocomplete="off">`) +
+      sRowCol("link", "c8", "Notification icon URL", "Optional. A .png shown on each notification.", `<input id="sNtfyIcon" type="url" value="${esc(s.ntfyIcon || "")}" placeholder="https://example.com/icon.png">`) +
+      sRow("send", "c1", "Mirror pop-ups to ntfy", "Sends a push alongside each reminder above. Needs a tab open - scheduled reminders on the Notifications tab are sent by the server and don't.", sSwitch("sNtfyTasks", !!s.ntfyTasks, "Mirror pop-ups to ntfy")) +
+      sRowCol("tag", "c4", "Quick-pick tags", "Up to 10 emoji, shown as buttons on the Notifications tab. Unrecognised emoji are skipped.", `<input id="sQuickTags" type="text" value="${esc(quick)}" placeholder="Paste up to 10 emoji, e.g. ⏰📬🚨📅💻" autocomplete="off"><div class="quickTagRow" id="sQuickPreview"></div>`) +
+      sRow("send", "c5", "Send a test notification", "Uses what is typed above, even before you leave the field.", `<button id="sNtfyTest" type="button">${svgIcon("send")} Send test</button>`, "sNtfyStatus"))}
+    ${sCard("board", "Board &amp; categories", "Columns, categories and quick timers",
+      sRowCol("board", "c5", `Board columns (up to ${COL_MAX})`, `The first column is what the Planner works from. "Clears daily" marks the column whose cards are deleted the next day - and counts as finished. Deleting a column moves its tasks to the first one.`, `<div id="sCols"></div><button id="sColAdd" class="ghost small" type="button">+ Add column</button>`) +
+      sRowCol("tag", "c3", "Task categories", "Names and colours used on cards, charts and the timesheet.", `<div id="sCats"></div><button id="sCatAdd" class="ghost small" type="button">+ Add category</button>`) +
+      sRowCol("alarm", "c2", "Interrupt quick-timers", "One per line. They appear as buttons beside the timer.", `<textarea id="sInt" rows="4">${esc((s.interrupts || []).join("\n"))}</textarea>`) +
+      sRow("clock", "c4", "Forgot to hit Start?", "When I correct a timer's start time, move the previous task's end to match so there's no unlogged gap.", sSwitch("sSyncLastEnd", s.syncLastTaskEnd !== false, "Adjust the previous task when correcting a start time")))}
+    ${sCard("calendar", "Calendar", "Meetings come from an iCalendar (ICS) feed - TimePilot never connects to your mail",
+      sRowCol("link", "c6", "Published calendar URL", "The ICS link from Outlook or Google Calendar.", `<input id="sIcs" type="url" value="${esc(s.icsUrl || "")}" placeholder="https://outlook.office365.com/owa/calendar/.../calendar.ics">`) +
+      sRowCol("upload", "c1", "Or upload a .ics file", "Used as a fallback if the URL is empty or unreachable.", `<button id="sIcsBtn" type="button">${svgIcon("upload")} Choose file</button> <span class="setMsg muted" id="sIcsStatus"></span><input type="file" id="sIcsFile" accept=".ics,text/calendar" hidden>`) +
+      sRowCol("calendar", "c8", "Ignore events titled", "One per line. Matching events are left out of the Planner, the dashboard and the timesheet.", `<textarea id="sIgnore" rows="3">${esc((s.ignoreEvents || ["Private Appointment"]).join("\n"))}</textarea>`))}
+    ${sCard("data", "Data &amp; backup", "Everything stays on your server",
+      sRow("download", "c5", "Export data", "A JSON file with your tasks, history, notes, snippets, clipboard, scratchpad, reminders and settings.", `<button id="sExport" type="button">${svgIcon("download")} Export</button>`) +
+      sRow("upload", "c6", "Import data", "Replaces everything in this account with the contents of a previously exported file.", `<button id="sImportBtn" type="button">${svgIcon("upload")} Choose file</button><input type="file" id="sImportFile" accept=".json,application/json" hidden>`, "sImportStatus"))}
+    </div></div>`;
+
+  // ---- menu: jump to a section ----
+  sec.querySelectorAll(".setMenuItem").forEach(b => b.onclick = () => {
+    const el = document.getElementById("set-" + b.dataset.sec);
+    if(el) el.scrollIntoView({behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"});
+    sec.querySelectorAll(".setMenuItem").forEach(x => x.classList.toggle("on", x === b));
+  });
+  $("#sLogout").onclick = logout;
+
+  // ---- appearance ----
+  sec.querySelectorAll(".themeTile").forEach(b => {
+    const pick = () => {
+      setS({theme: b.dataset.pick});
+      sec.querySelectorAll(".themeTile").forEach(x => { x.classList.toggle("on", x === b); x.setAttribute("aria-checked", x === b); });
+    };
+    b.onclick = pick;
+    b.onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); pick(); } };
+  });
+  $("#sFontSeg").onclick = e => {
+    const b = e.target.closest("button[data-font]"); if(!b) return;
+    setS({font: b.dataset.font});
+    $("#sFontSeg").querySelectorAll("button").forEach(x => { x.classList.toggle("on", x === b); x.setAttribute("aria-pressed", x === b); });
   };
-  // --- quick-pick tags: live preview of which pasted emoji were recognized ---
-  const drawQuickPreview = () => {
-    const tags = parseQuickTagsInput($("#sQuickTags").value);
-    const box = $("#sQuickPreview");
-    box.innerHTML = tags.length
-      ? tags.map(t=>`<button type="button" disabled title="${t}">${NTFY_TAG_EMOJI[t]}</button>`).join("")
-      : `<span class="qtEmpty">No emoji recognized yet.</span>`;
+
+  // ---- hours: each pair is saved only when valid, otherwise the message says why ----
+  const pair = (a, b, msgId, keys, text, allowBlank) => {
+    const check = () => {
+      const va = $("#" + a).value, vb = $("#" + b).value, msg = $("#" + msgId);
+      const bad = (!allowBlank && (!va || !vb)) || (va && vb && hmToMin(vb) <= hmToMin(va));
+      msg.textContent = bad ? text + " - not saved." : ""; msg.classList.toggle("errText", !!bad);
+      if(!bad) setS({[keys[0]]: va, [keys[1]]: vb});
+    };
+    $("#" + a).onchange = $("#" + b).onchange = check;
   };
-  $("#sQuickTags").addEventListener("input", drawQuickPreview);
-  drawQuickPreview();
-  // --- backup: export downloads a JSON snapshot; import replaces everything ---
-  $("#sExport").onclick = async () => {
-    const r = await fetch("/api/export");
-    if(!r.ok){ alert("Export failed."); return; }
-    const data = await r.json();
-    const stamp = new Date().toISOString().slice(0,10);
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], {type:"application/json"}));
-    a.download = `timepilot-export-${data.username}-${stamp}.json`;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
-  };
-  $("#sImportFile").onchange = async e => {
-    const file = e.target.files[0]; if(!file) return;
-    const status = $("#sImportStatus");
-    const fail = msg => { status.textContent = msg; status.classList.add("errText"); e.target.value = ""; };
-    status.classList.remove("errText");
-    let parsed;
-    try { parsed = JSON.parse(await file.text()); }
-    catch(err){
-      const head = new Uint8Array(await file.slice(0,2).arrayBuffer());
-      if(head[0]===0x50 && head[1]===0x4B){ fail("That's a .zip file - this expects the JSON file downloaded by \"Export data\"."); return; }
-      fail("Not a valid JSON file."); return;
-    }
-    if(parsed.app !== "timepilot"){ fail("Not a TimePilot export file."); return; }
-    const counts = Object.entries(parsed.state||{})
-      .filter(([k,v])=>Array.isArray(v)).map(([k,v])=>`${v.length} ${k}`).join(", ");
-    if(!confirm(`Import this file? This REPLACES everything currently in your account (${counts}) and cannot be undone.`)){
-      e.target.value = ""; return;
-    }
-    status.textContent = "Importing...";
-    const r = await fetch("/api/import", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(parsed)});
-    const j = await r.json();
-    if(!r.ok){ fail(j.error || "Import failed."); return; }
-    status.textContent = "Restored ✓ reloading...";
-    setTimeout(() => location.reload(), 700);   // simplest correct way to resync every view with the replaced data
-  };
-  // --- browser notifications: reflect + request permission on toggle ---
-  const notifSupported = "Notification" in window;
-  const notifBox = $("#sBrowserNotif"), notifNote = $("#notifPermNote");
+  pair("sStart", "sEnd", "sHoursMsg", ["dayStart", "dayEnd"], "Work hours must end after they start", false);
+  pair("sViewStart", "sViewEnd", "sViewMsg", ["viewStart", "viewEnd"], "The display range must end after it starts", true);
+  pair("sLunchStart", "sLunchEnd", "sLunchMsg", ["lunchStart", "lunchEnd"], "Lunch must end after it starts", true);
+  $("#sRound").onchange = e => { const v = clampInt(e.target.value, 1, 1440, s.rounding || 5); e.target.value = v; setS({rounding: v}); };
+
+  // ---- reminders ----
+  $("#sRemind").onchange = e => setS({remind: e.target.checked});
+  $("#sLead").onchange = e => { const v = clampInt(e.target.value, 0, 120, s.remindLead || 0); e.target.value = v; setS({remindLead: v}); };
+  $("#sRemindMeetings").onchange = e => setS({remindMeetings: e.target.checked});
+  const notifSupported = "Notification" in window, notifBox = $("#sBrowserNotif"), notifNote = $("#notifPermNote");
   const renderNotifNote = () => {
-    if(!notifSupported){ notifNote.textContent = "not supported in this browser"; notifBox.disabled = true; notifBox.checked = false; return; }
-    if(Notification.permission === "denied") notifNote.textContent = "blocked - allow notifications for this site in your browser settings";
-    else if(Notification.permission === "granted") notifNote.textContent = "permission granted";
-    else notifNote.textContent = "will ask for permission when enabled";
+    if(!notifSupported){ notifNote.textContent = " - not supported in this browser"; notifBox.disabled = true; notifBox.checked = false; return; }
+    notifNote.textContent = Notification.permission === "denied" ? " - blocked: allow notifications for this site in your browser settings"
+      : Notification.permission === "granted" ? " - permission granted" : " - will ask for permission when enabled";
   };
   renderNotifNote();
   notifBox.onchange = async () => {
-    if(!notifBox.checked) return;               // turning off never needs permission
-    if(!notifSupported){ notifBox.checked = false; return; }
-    if(Notification.permission === "granted"){ renderNotifNote(); return; }
-    const perm = await Notification.requestPermission();
-    if(perm !== "granted") notifBox.checked = false;
-    renderNotifNote();
+    let ok = notifBox.checked;
+    if(ok){
+      ok = notifSupported && (Notification.permission === "granted" || await Notification.requestPermission() === "granted");
+      notifBox.checked = ok;
+    }
+    setS({browserNotifications: ok}); renderNotifNote();
   };
-  // --- board column manager (works on a copy; applied on Save) ---
-  const colsWork = getCols().map(c=>({...c}));
+
+  // ---- ntfy ----
+  $("#sNtfyUrl").onchange = e => setS({ntfyUrl: e.target.value.trim()});
+  $("#sNtfyTopic").onchange = e => setS({ntfyTopic: e.target.value.trim()});
+  $("#sNtfyIcon").onchange = e => setS({ntfyIcon: e.target.value.trim()});
+  $("#sNtfyTasks").onchange = e => setS({ntfyTasks: e.target.checked});
+  const drawQuick = () => {
+    const tags = parseQuickTagsInput($("#sQuickTags").value);
+    $("#sQuickPreview").innerHTML = tags.length ? tags.map(t => `<button type="button" disabled title="${esc(t)}">${NTFY_TAG_EMOJI[t]}</button>`).join("") : `<span class="qtEmpty">No emoji recognized yet.</span>`;
+  };
+  $("#sQuickTags").oninput = drawQuick;
+  $("#sQuickTags").onchange = () => setS({quickTags: parseQuickTagsInput($("#sQuickTags").value)});
+  drawQuick();
+  $("#sNtfyTest").onclick = async () => {
+    const st = $("#sNtfyStatus"), say = (t, err) => { st.textContent = t; st.classList.toggle("errText", !!err); };
+    if(!$("#sNtfyTopic").value.trim()){ say("Set a topic first", true); return; }
+    say("Sending...");
+    try {
+      const r = await fetch("/api/ntfy/send", {method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({message:"TimePilot test notification - if you can read this, it works.", title:"TimePilot", tag:"white_check_mark",
+          ntfyUrl:$("#sNtfyUrl").value.trim(), ntfyTopic:$("#sNtfyTopic").value.trim(), ntfyIcon:$("#sNtfyIcon").value.trim()})});
+      const j = await r.json().catch(() => ({}));
+      if(r.ok) say("Sent ✓ check your device"); else say(j.error || "Send failed", true);
+    } catch(e){ say("Send failed", true); }
+  };
+
+  // ---- board columns ----
+  const colsWork = getCols().map(c => ({...c}));
+  const commitCols = () => {
+    S.settings.columns = colsWork.map(c => ({k:c.k, label:c.label, done:!!c.done}));
+    reconcileColumns();   // rehome tasks whose column was deleted
+    dailyCleanup();
+    markDirty(); drawCols(); redraw("dash", "board", "today", "insights");
+  };
   function drawCols(){
     const box = $("#sCols"); box.innerHTML = "";
-    colsWork.forEach((c,i)=>{
-      const n = S.tasks.filter(t=>t.column===c.k).length;
-      const row = document.createElement("div");
-      row.style.cssText = "display:flex;gap:6px;align-items:center;margin-bottom:5px";
-      row.innerHTML = `<input maxlength="24" value="${esc(c.label)}" style="flex:1;min-width:0">
-        <label class="small muted" style="flex:none;display:flex;gap:4px;align-items:center"
-          title="Cards in this column are deleted the next day"><input type="checkbox"${c.done?" checked":""}> clears daily</label>
-        <span class="small muted" style="flex:none;min-width:62px;text-align:right">${i===0?"Today source":(n?n+(n===1?" task":" tasks"):"")}</span>
-        <button type="button" class="ghost small danger"${colsWork.length<2?" disabled":""}>&#10005;</button>`;
+    colsWork.forEach((c, i) => {
+      const n = S.tasks.filter(t => t.column === c.k).length, row = document.createElement("div");
+      row.className = "mgrRow";
+      row.innerHTML = `<input type="text" maxlength="24" value="${esc(c.label)}" aria-label="Column name">
+        <label title="Cards in this column are deleted the next day, and count as finished"><input type="checkbox"${c.done ? " checked" : ""}> clears daily</label>
+        <span class="hint">${i === 0 ? "Planner source" : (n ? plural(n, "task") : "")}</span>
+        <button type="button" class="ghost small danger" aria-label="Delete column"${colsWork.length < 2 ? " disabled" : ""}>&#10005;</button>`;
       const [lab, dn] = row.querySelectorAll("input");
-      lab.onchange = () => { c.label = lab.value.trim().slice(0,24) || c.label; lab.value = c.label; };
-      dn.onchange = () => { colsWork.forEach(x=>x.done=false); c.done = dn.checked; drawCols(); };
+      lab.onchange = () => { c.label = lab.value.trim().slice(0, 24) || c.label; commitCols(); };
+      dn.onchange = () => { colsWork.forEach(x => x.done = false); c.done = dn.checked; commitCols(); };
       row.querySelector("button").onclick = () => {
         const dest = (i === 0 ? colsWork[1] : colsWork[0]).label;
-        if(n && !confirm(`Delete "${c.label}"? Its ${n} task${n===1?"":"s"} move to "${dest}".`)) return;
-        colsWork.splice(i,1); drawCols();
+        if(n && !confirm(`Delete "${c.label}"? Its ${plural(n, "task")} move to "${dest}".`)) return;
+        colsWork.splice(i, 1); commitCols();
       };
       box.appendChild(row);
     });
     $("#sColAdd").disabled = colsWork.length >= COL_MAX;
   }
   drawCols();
-  $("#sColAdd").onclick = () => { colsWork.push({k:"col_"+uid(), label:"New column", done:false}); drawCols(); };
-  // --- category manager (works on a copy; applied on Save) ---
-  const catsWork = getCats().map(c=>({...c}));
+  $("#sColAdd").onclick = () => { colsWork.push({k:"col_" + uid(), label:"New column", done:false}); commitCols(); };
+
+  // ---- categories ----
+  const catsWork = getCats().map(c => ({...c}));
+  const commitCats = () => {
+    S.settings.categories = catsWork.map(c => ({k:c.k, label:c.label, color:c.color}));
+    const valid = new Set(catsWork.map(c => c.k)), fb = defCat();
+    S.tasks.forEach(t => { if(!valid.has(t.category)) t.category = fb; });
+    S.timelog.forEach(e => { if(e.category && e.category !== "meeting" && !valid.has(e.category)) e.category = fb; });
+    (S.completed || []).forEach(c => { if(!valid.has(c.category)) c.category = fb; });
+    markDirty(); drawCats(); redraw("dash", "board", "today", "insights");
+  };
   function drawCats(){
     const box = $("#sCats"); box.innerHTML = "";
-    catsWork.forEach((c,i)=>{
-      const row = document.createElement("div");
-      row.style.cssText = "display:flex;gap:6px;align-items:center;margin-bottom:5px";
-      row.innerHTML = `<input maxlength="20" value="${esc(c.label)}" style="flex:1;min-width:0">
-        <input type="color" value="${safeColor(c.color)}" style="width:40px;height:30px;padding:2px">
-        <button type="button" class="ghost small danger"${catsWork.length<2?" disabled":""}>✕</button>`;
+    catsWork.forEach((c, i) => {
+      const row = document.createElement("div"); row.className = "mgrRow";
+      row.innerHTML = `<input type="text" maxlength="20" value="${esc(c.label)}" aria-label="Category name">
+        <input type="color" value="${safeColor(c.color)}" aria-label="Category colour">
+        <button type="button" class="ghost small danger" aria-label="Delete category"${catsWork.length < 2 ? " disabled" : ""}>✕</button>`;
       const [lab, col] = row.querySelectorAll("input");
-      lab.onchange = () => c.label = lab.value.trim().slice(0,20) || c.label;
-      col.oninput = () => c.color = col.value;
-      row.querySelector("button").onclick = () => { catsWork.splice(i,1); drawCats(); };
+      lab.onchange = () => { c.label = lab.value.trim().slice(0, 20) || c.label; commitCats(); };
+      col.onchange = () => { c.color = col.value; commitCats(); };
+      row.querySelector("button").onclick = () => {
+        const used = S.tasks.filter(t => t.category === c.k).length + S.timelog.filter(e => e.category === c.k).length;
+        const dest = (i === 0 ? catsWork[1] : catsWork[0]).label;
+        if(used && !confirm(`Delete "${c.label}"? The ${used} task${used === 1 ? "" : "s"} and log ${used === 1 ? "entry" : "entries"} using it move to "${dest}".`)) return;
+        catsWork.splice(i, 1); commitCats();
+      };
       box.appendChild(row);
     });
   }
   drawCats();
-  $("#sCatAdd").onclick = () => { catsWork.push({k:"c_"+uid(), label:"New category", color:"#57b76a"}); drawCats(); };
+  $("#sCatAdd").onclick = () => { catsWork.push({k:"c_" + uid(), label:"New category", color:"#57b76a"}); commitCats(); };
+  $("#sInt").onchange = e => { setS({interrupts: e.target.value.split("\n").map(x => x.trim()).filter(Boolean)}); renderStrip(); };
+  $("#sSyncLastEnd").onchange = e => setS({syncLastTaskEnd: e.target.checked});
+
+  // ---- calendar ----
+  $("#sIcs").onchange = e => setS({icsUrl: e.target.value.trim()}, {cal:true});
+  $("#sIgnore").onchange = e => setS({ignoreEvents: e.target.value.split("\n").map(x => x.trim()).filter(Boolean)}, {cal:true});
+  $("#sIcsBtn").onclick = () => $("#sIcsFile").click();
   $("#sIcsFile").onchange = async e => {
     const file = e.target.files[0]; if(!file) return;
-    const { token } = await (await fetch("/api/csrf-token")).json();
-    const r = await fetch("/api/calendar/upload", {method:"POST", headers:{"X-CSRFToken":token}, body: await file.text()});
-    const j = await r.json();
-    $("#sIcsStatus").textContent = j.ok ? `Uploaded ✓ (${Math.round(j.size/1024)} KB)` : (j.error || "Upload failed");
-    calCache = {};
+    const st = $("#sIcsStatus");
+    st.textContent = "Uploading...";
+    try {
+      const { token } = await (await fetch("/api/csrf-token")).json();
+      const r = await fetch("/api/calendar/upload", {method:"POST", headers:{"X-CSRFToken":token}, body: await file.text()});
+      const j = await r.json();
+      st.textContent = j.ok ? `Uploaded ✓ (${Math.round(j.size / 1024)} KB)` : (j.error || "Upload failed");
+      calCache = {}; redraw("dash", "today");
+    } catch(err){ st.textContent = "Upload failed"; }
   };
-  $("#mSave").onclick = async () => {
-    const lunchStart = $("#sLunchStart").value, lunchEnd = $("#sLunchEnd").value;
-    if(lunchStart && lunchEnd && hmToMin(lunchEnd) <= hmToMin(lunchStart)){
-      alert("Lunch end time must be after lunch start time."); return;
+
+  // ---- data: export downloads a JSON snapshot; import replaces everything ----
+  $("#sExport").onclick = async () => {
+    const r = await fetch("/api/export");
+    if(!r.ok){ alert("Export failed."); return; }
+    const data = await r.json(), a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], {type:"application/json"}));
+    a.download = `timepilot-export-${data.username}-${todayISO()}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  };
+  $("#sImportBtn").onclick = () => $("#sImportFile").click();
+  $("#sImportFile").onchange = async e => {
+    const file = e.target.files[0]; if(!file) return;
+    const status = $("#sImportStatus");
+    const fail = msg => { status.textContent = msg; status.classList.add("errText"); e.target.value = ""; };
+    status.textContent = ""; status.classList.remove("errText");
+    let parsed;
+    try { parsed = JSON.parse(await file.text()); }
+    catch(err){
+      const head = new Uint8Array(await file.slice(0, 2).arrayBuffer());
+      fail(head[0] === 0x50 && head[1] === 0x4B ? "That's a .zip file - this expects the JSON file downloaded by \"Export\"." : "Not a valid JSON file."); return;
     }
-    Object.assign(s, { icsUrl:$("#sIcs").value.trim(), theme:$("#sTheme").value, font:$("#sFont").value,
-      dayStart:$("#sStart").value, dayEnd:$("#sEnd").value, rounding:+$("#sRound").value||5,
-      viewStart:$("#sViewStart").value, viewEnd:$("#sViewEnd").value,
-      lunchStart, lunchEnd,
-      remind:$("#sRemind").checked, remindLead:+$("#sLead").value||0,
-      syncLastTaskEnd:$("#sSyncLastEnd").checked,
-      remindMeetings:$("#sRemindMeetings").checked,
-      browserNotifications:$("#sBrowserNotif").checked,
-      ntfyUrl:$("#sNtfyUrl").value.trim(), ntfyTopic:$("#sNtfyTopic").value.trim(),
-      ntfyIcon:$("#sNtfyIcon").value.trim(), ntfyTasks:$("#sNtfyTasks").checked,
-      quickTags: parseQuickTagsInput($("#sQuickTags").value),
-      interrupts:$("#sInt").value.split("\n").map(x=>x.trim()).filter(Boolean),
-      ignoreEvents:$("#sIgnore").value.split("\n").map(x=>x.trim()).filter(Boolean),
-      categories: catsWork, columns: colsWork });
-    const valid = new Set(catsWork.map(c=>c.k));
-    S.tasks.forEach(t=>{ if(!valid.has(t.category)) t.category = defCat(); });
-    reconcileColumns();   // rehome tasks whose column was renamed away or deleted
-    S.timelog.forEach(e=>{ if(e.category && e.category!=="meeting" && !valid.has(e.category)) e.category = defCat(); });
-    calCache = {}; markDirty();
-    await persist();   // wait for the actual write to land - Settings Save is a deliberate action, not
-                        // something that should still be sitting in the 600ms auto-save debounce when
-                        // the modal closes and the user immediately checks Today/Export against the server
-    applySettings(); closeModal(); renderAll();
+    if(!parsed || parsed.app !== "timepilot"){ fail("Not a TimePilot export file."); return; }
+    const counts = Object.entries(parsed.state || {}).filter(([k, v]) => Array.isArray(v)).map(([k, v]) => `${v.length} ${k}`).join(", ");
+    if(!confirm(`Import this file? This REPLACES everything currently in your account (${counts}) and cannot be undone.`)){ e.target.value = ""; return; }
+    status.textContent = "Importing...";
+    const r = await fetch("/api/import", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(parsed)});
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok){ fail(j.error || "Import failed."); return; }
+    status.textContent = "Restored ✓ reloading...";
+    setTimeout(() => location.reload(), 700);   // simplest correct way to resync every view with the replaced data
   };
-  $("#mCancel").onclick = () => { applySettings(); closeModal(); };
-};
+  setActiveMenu();
+}
+
+// Highlight the menu entry for the section currently at the top of the page.
+let _setRaf = 0;
+function setActiveMenu(){
+  if(!S || !shown("settings")) return;
+  let cur = SET_SECTIONS[0][0];
+  SET_SECTIONS.forEach(([id]) => { const el = document.getElementById("set-" + id); if(el && el.getBoundingClientRect().top < 140) cur = id; });
+  document.querySelectorAll("#setMenu .setMenuItem").forEach(b => b.classList.toggle("on", b.dataset.sec === cur));
+}
+window.addEventListener("scroll", () => { if(!_setRaf) _setRaf = requestAnimationFrame(() => { _setRaf = 0; setActiveMenu(); }); }, {passive:true});
+
 function openModal(html){ $("#modalBox").innerHTML = html; $("#modalBox").classList.remove("sticky"); $("#modal").classList.add("open"); }
-function closeModal(){ $("#modal").classList.remove("open"); $("#modalBox").classList.remove("settings","sticky"); }
+function closeModal(){ $("#modal").classList.remove("open"); $("#modalBox").classList.remove("sticky"); }
 // A "sticky" modal (see taskModal) ignores backdrop clicks, so a stray click
 // can't throw away typed text - only Cancel/Save/Delete close it.
 $("#modal").onclick = e => { if(e.target.id==="modal" && !$("#modalBox").classList.contains("sticky")) closeModal(); };
@@ -2452,8 +3320,8 @@ $("#modal").onclick = e => { if(e.target.id==="modal" && !$("#modalBox").classLi
 document.querySelectorAll("nav .tab").forEach(b=>{
   b.onclick = () => setView(b.dataset.view);
 });
-const VIEWS = ["board","today","notes","snips","paste","scratch","notif","export"];
-let prevView = "today";
+const VIEWS = ["dash","board","today","insights","notes","snips","paste","scratch","notif","export","settings"];
+let prevView = "board";
 // The pinned (left-hand) view, or null when not split.
 function pinnedView(){
   const p = S.settings.pinView;
@@ -2482,13 +3350,16 @@ function setView(v){
   updateSplitBtn();
 }
 function renderView(v){
-  if(v==="board") renderBoard();
+  if(v==="dash") renderDash();
+  if(v==="board") renderTasks();
   if(v==="today") renderToday();
+  if(v==="insights") renderInsights();
   if(v==="notes") renderNotes();
   if(v==="snips"||v==="paste") renderLib(v);
   if(v==="scratch") renderScratch();
   if(v==="notif"){ remFormReset(); loadReminders().then(renderNotif); }
   if(v==="export") renderExport();
+  if(v==="settings") renderSettings();
 }
 function tabLabel(v){
   const b = document.querySelector(`nav .tab[data-view="${v}"]`);
@@ -2561,7 +3432,7 @@ async function checkMeetingReminders(){
   const lead = +S.settings.remindLead || 0;
   const now = hmToMin(hmNow());
   const GRACE = 10;
-  const ignore = (S.settings.ignoreEvents || ["Private Appointment"]).map(x=>x.toLowerCase().trim()).filter(Boolean);
+  const ignore = ignoredTitles();
   const due = cal.events.find(ev => {
     if(ev.allDay) return false;
     const title = (ev.title||"").toLowerCase();
@@ -2644,17 +3515,18 @@ window.addEventListener("resize", () => {
     // the whole timeline mid-motion. A real resize - including rotating the
     // device - always changes width too, so that's the signal to act on.
     const w = window.innerWidth, changed = w !== _rzW; _rzW = w;
-    if(changed && view==="today") renderToday();
+    if(changed){ if(shown("today")) renderToday(); redraw("insights"); }
   }, 150);
 });
 
 window.addEventListener("beforeunload", () => { if(dirty) persistBeacon(); });
-$("#logoutBtn").onclick = async () => {
+async function logout(){
   if(dirty) await persist();  // don't lose in-flight edits
   const { token } = await (await fetch("/api/csrf-token")).json();
   await fetch("/logout", { method: "POST", headers: { "X-CSRFToken": token } });
   location.href = "/login";
-};
+}
+$("#logoutBtn").onclick = logout;
 loadState();
 </script>
 </body>
