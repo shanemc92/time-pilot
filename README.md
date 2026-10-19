@@ -226,6 +226,17 @@ idempotent - re-run it any time to pick up config changes without
 disturbing what's already set up. Edit the variables block at the top of
 the script before running it; every value is commented inline.
 
+After the first run the script installs a token-free copy at
+`/usr/local/sbin/redeploy-timepilot.sh` (your config and the Cloudflare token
+move to a root-only `/root/.secrets/timepilot-deploy.env`) and registers a
+cron job that keeps the box healthy on its own: every night, and once after
+each boot, it updates itself from this repo, then repairs whatever is broken -
+a certificate that is close to expiry **or whose renewed copy nginx never
+reloaded**, a stopped nginx/Docker/app container, a drifted DNS record or
+missing config files - and only sends an ntfy message when it fixed
+something or failed. Run `sudo /usr/local/sbin/redeploy-timepilot.sh --heal`
+to trigger a repair pass by hand, or without `--heal` for the full run.
+
 ## Calendar (optional)
 
 TimePilot reads your calendar from an **iCalendar (ICS)** feed - it never

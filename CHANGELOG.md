@@ -506,6 +506,19 @@ Includes everything in 2.7.0.
   running in UTC would otherwise put early-morning reminders on the wrong
   day. Reminders saved before this change have no `days`/`tz` and behave
   exactly as before; the export format gains the two optional fields.
+- **BUGFIX:** The demo deploy script's final check ignored certificate errors
+  (`curl -k`), so a demo box could report success while serving an expired
+  certificate. It now validates the certificate, and the cert step checks the
+  cert nginx is actually serving, not just the file on disk - a renewed
+  certificate that nginx never reloaded is reloaded instead of left to expire.
+- **FEATURE:** `deploy/init-timepilot-demo.sh` now self-updates and self-heals,
+  matching the SWS deploy script: it installs a token-free copy at
+  `/usr/local/sbin/redeploy-timepilot.sh`, keeps its config and Cloudflare token
+  in a root-only `/root/.secrets/timepilot-deploy.env`, and runs a `--heal`
+  pass from cron nightly and after boot (self-update, then repair cert, nginx,
+  Docker, the app container and the DNS record, notifying via ntfy only when it
+  fixes something or fails). A box set up by the old script can be migrated by
+  running the new script once by hand.
 
 ## 3.1.0 - Dashboard, Insights and a Settings tab
 
