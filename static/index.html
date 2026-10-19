@@ -65,15 +65,15 @@
   --shadow:0 24px 60px -24px rgba(0,0,0,.8);
 }
 [data-theme="bloom"]{
-  /* the colourful one: magenta, violet, blue and orange light behind deep-plum glass */
+  /* the colourful one: a plain deep-plum background, with the colour in the accent, rings and charts */
   color-scheme:dark;
-  --bg:#0b0518; --surface:rgba(38,18,66,.42); --surface-strong:rgba(26,12,50,.93);
+  --bg:#130a24; --surface:rgba(48,28,82,.62); --surface-strong:rgba(32,17,58,.94);
   --surface2:rgba(255,215,255,.075); --line:rgba(255,190,255,.17); --hi:rgba(255,220,255,.20);
   --text:#fcf2ff; --muted:#bca5d9; --accent:#ff5fa8; --accent-text:#2c0a1f;
   --cat-general:#7aa7ff; --cat-secops:#ff7a8a; --cat-change:#b794ff;
   --cal:#5a4aa6; --danger:#ff6b7f; --ok:#3ee6a8; --lcd-bg:rgba(0,0,0,.40);
-  --orb1:rgba(255,60,170,.80); --orb2:rgba(125,80,255,.80); --orb3:rgba(255,140,60,.60); --orb4:rgba(40,130,255,.64);
-  --shadow:0 24px 60px -24px rgba(8,0,24,.85);
+  --orb1:rgba(255,95,168,.07); --orb2:rgba(125,80,255,.07); --orb3:rgba(255,255,255,.02);
+  --shadow:0 24px 60px -24px rgba(6,0,18,.85);
 }
 [data-font="sans"]{ --ff:"Inter","SF Pro Display","Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,Roboto,sans-serif; }
 [data-font="mono"]{ --ff:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace; }
@@ -100,14 +100,6 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
     radial-gradient(60vmax 46vmax at 6% -6%, var(--orb1), transparent 62%),
     radial-gradient(52vmax 44vmax at 104% 16%, var(--orb2), transparent 62%),
     radial-gradient(70vmax 46vmax at 42% 112%, var(--orb3), transparent 62%),
-    var(--bg)}
-/* Bloom paints four larger, brighter lights than the other themes */
-body[data-theme="bloom"]::before{background:
-    url("/static/grain.svg"),
-    radial-gradient(72vmax 56vmax at 4% 0%, var(--orb1), transparent 66%),
-    radial-gradient(66vmax 58vmax at 100% 10%, var(--orb2), transparent 66%),
-    radial-gradient(72vmax 52vmax at 72% 108%, var(--orb3), transparent 66%),
-    radial-gradient(64vmax 52vmax at 0% 100%, var(--orb4), transparent 66%),
     var(--bg)}
 ::selection{background:color-mix(in srgb,var(--accent) 45%,transparent)}
 ::-webkit-scrollbar{width:10px;height:10px}
@@ -424,8 +416,6 @@ input.scrRename{font-size:12px;padding:1px 5px;width:120px;min-width:0}
 
 [data-theme="aurora"] option{background:#0f2028;color:#e8f4f6}
 [data-theme="bloom"] option{background:#1d0f36;color:#fcf2ff}
-/* the colour is strong enough that panels need their own frosting to stay readable */
-body[data-theme="bloom"] :is(.panel,.col,.stat,.filterBar,#timeline){-webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%)}
 
 /* ---- page headers, stat tiles, segmented controls (Dashboard / Tasks / Insights / Settings) ---- */
 .pageHead{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:2px 2px 16px}
@@ -654,8 +644,7 @@ main.split #dashGrid,main.split #insGrid{grid-template-columns:minmax(0,1fr)}
 .themeTile .pvbox{display:block;color:var(--text)}
 .themeTile .pv{display:block;position:relative;height:64px;
   background:radial-gradient(120% 90% at 0% 0%,var(--orb1),transparent 60%),radial-gradient(100% 90% at 100% 20%,var(--orb2),transparent 60%),
-    radial-gradient(120% 100% at 40% 120%,var(--orb3),transparent 60%),
-    radial-gradient(90% 90% at 0% 110%,var(--orb4,transparent),transparent 60%),var(--bg)}
+    radial-gradient(120% 100% at 40% 120%,var(--orb3),transparent 60%),var(--bg)}
 .themeTile .pv i{position:absolute;background:var(--surface);border:1px solid var(--line)}
 .themeTile .pv .r{left:7px;top:7px;bottom:7px;width:12px;border-radius:7px}
 .themeTile .pv .c1{left:26px;top:7px;right:7px;height:16px;border-radius:6px}

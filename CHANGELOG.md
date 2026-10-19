@@ -577,9 +577,8 @@ Includes everything in 2.7.0.
 
 ## Bloom theme
 
-- **FEATURE:** A sixth theme, **Bloom**: four large magenta, violet, blue and
-  orange lights behind deep-plum glass, with a pink accent. Its panels carry
-  their own frosting so text stays readable over the colour. Pick it in
-  Settings -> Appearance (the theme previews show it); as with Aurora, 2.x
-  falls back to Dark for an account set to it. The README gallery now shows all
-  six themes.
+- **FEATURE:** A sixth theme, **Bloom**: a plain deep-plum background with the
+  colour in the pink accent, the progress rings and the charts, rather than in
+  glowing lights behind the page. Pick it in Settings -> Appearance (the theme
+  previews show it); as with Aurora, 2.x falls back to Dark for an account set
+  to it. The README gallery now shows all six themes.
