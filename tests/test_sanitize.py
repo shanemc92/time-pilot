@@ -114,6 +114,17 @@ class Injection(unittest.TestCase):
         self.assertIsNone(clean(dict(rep, days=[1], tz="../etc/passwd"))["tz"])
         self.assertIsNone(clean(dict(rep, tz="Europe/Dublin"))["tz"])
 
+    def test_reminder_pause_fields(self):
+        good = {"message": "m", "next_fire": 1}
+        self.assertEqual(S.clean_reminder(dict(good))["paused"], False)
+        paused = S.clean_reminder(dict(good, paused=True, paused_until=1_800_000_000))
+        self.assertEqual((paused["paused"], paused["paused_until"]), (True, 1_800_000_000))
+        self.assertIsNone(S.clean_reminder(dict(good, paused=True, paused_until=PAYLOAD))["paused_until"])
+        self.assertIsNone(S.clean_reminder(dict(good, paused=True, paused_until=-5))["paused_until"])
+        # Only a real boolean pauses, and an end time means nothing on a running reminder.
+        self.assertEqual(S.clean_reminder(dict(good, paused="yes"))["paused"], False)
+        self.assertIsNone(S.clean_reminder(dict(good, paused=False, paused_until=1_800_000_000))["paused_until"])
+
     def test_active_timer_needs_a_real_start(self):
         self.assertIsNone(S.clean_active_timer({"label": "x", "start": PAYLOAD}))
         self.assertIsNone(S.clean_active_timer("nope"))

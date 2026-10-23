@@ -115,5 +115,86 @@ class Dispatch(unittest.TestCase):
         self.assertEqual(kept[0]["next_fire"], SAT)
 
 
+class Pause(unittest.TestCase):
+    def reminder(self, **kw):
+        r = {"id": "r", "message": "m", "priority": 3, "tag": "alarm_clock", "next_fire": FRI,
+             "recurring": True, "interval_type": "days", "interval_value": 1, "days": None, "tz": None}
+        r.update(kw)
+        return r
+
+    def run_dispatch(self, reminders, now):
+        with mock.patch.object(ntfy, "send", return_value=(True, None)) as send:
+            kept, sent = ntfy.dispatch_for_user({"ntfyTopic": "t"}, reminders, now=now)
+        return kept, sent, send
+
+    def test_a_paused_reminder_is_never_sent_and_keeps_its_rhythm(self):
+        kept, sent, send = self.run_dispatch([self.reminder(paused=True)], FRI + 60)
+        self.assertEqual(sent, 0)
+        send.assert_not_called()
+        self.assertEqual(kept[0]["next_fire"], SAT)            # rolled on, not left overdue
+        self.assertTrue(kept[0]["paused"])
+
+    def test_a_paused_one_off_waits_untouched(self):
+        kept, sent, send = self.run_dispatch([self.reminder(recurring=False, interval_type=None,
+                                                            interval_value=None, paused=True)], SUN)
+        self.assertEqual((sent, len(kept), kept[0]["next_fire"]), (0, 1, FRI))
+        send.assert_not_called()
+
+    def test_other_reminders_are_unaffected(self):
+        kept, sent, _ = self.run_dispatch([self.reminder(id="a", paused=True), self.reminder(id="b")], FRI + 60)
+        self.assertEqual(sent, 1)
+        self.assertEqual([r["id"] for r in kept], ["a", "b"])
+
+    def test_a_pause_with_an_end_skips_everything_inside_it(self):
+        # Paused until Wed 00:00; the next one is Wed 09:00, and nothing is sent on the way.
+        until = ts(2026, 10, 14, 0)
+        kept, sent, send = self.run_dispatch([self.reminder(paused=True, paused_until=until)], until + 30)
+        self.assertEqual(sent, 0)
+        send.assert_not_called()
+        self.assertEqual(kept[0]["next_fire"], ts(2026, 10, 14, 9))
+        self.assertEqual((kept[0]["paused"], kept[0]["paused_until"]), (False, None))
+
+    def test_an_occurrence_exactly_at_the_end_of_the_pause_is_sent(self):
+        until = ts(2026, 10, 14, 9)
+        kept, sent, _ = self.run_dispatch([self.reminder(next_fire=until, paused=True, paused_until=until)], until + 10)
+        self.assertEqual(sent, 1)
+        self.assertEqual(kept[0]["next_fire"], ts(2026, 10, 15, 9))
+
+    def test_a_pause_that_has_not_ended_stays_paused(self):
+        until = ts(2026, 10, 14, 0)
+        kept, sent, _ = self.run_dispatch([self.reminder(paused=True, paused_until=until)], until - 3600)
+        self.assertEqual((sent, kept[0]["paused"], kept[0]["paused_until"]), (0, True, until))
+
+    def test_needs_dispatch(self):
+        now = FRI + 60
+        self.assertTrue(ntfy.needs_dispatch(self.reminder(), now))
+        self.assertFalse(ntfy.needs_dispatch(self.reminder(next_fire=now + 5), now))
+        self.assertTrue(ntfy.needs_dispatch(self.reminder(paused=True), now))               # repeating: must roll on
+        self.assertFalse(ntfy.needs_dispatch(self.reminder(paused=True, next_fire=now + 5), now))
+        one_off = self.reminder(recurring=False, interval_type=None, interval_value=None, paused=True)
+        self.assertFalse(ntfy.needs_dispatch(one_off, now))                                 # nothing to do: no write
+        self.assertTrue(ntfy.needs_dispatch(dict(one_off, paused_until=now - 1), now))      # the pause ran out
+
+    def test_apply_pause_all_or_some(self):
+        rs = [self.reminder(id="a", next_fire=FRI + 10 ** 6), self.reminder(id="b", next_fire=FRI + 10 ** 6)]
+        self.assertEqual(ntfy.apply_pause(rs, True, ids={"a"}, now=FRI), 1)
+        self.assertEqual([r.get("paused") for r in rs], [True, None])
+        self.assertEqual(ntfy.apply_pause(rs, True, until=SUN, now=FRI), 2)
+        self.assertEqual([(r["paused"], r["paused_until"]) for r in rs], [(True, SUN)] * 2)
+        self.assertEqual(ntfy.apply_pause(rs, False, now=FRI), 2)
+        self.assertEqual([(r["paused"], r["paused_until"]) for r in rs], [(False, None)] * 2)
+        self.assertEqual(ntfy.apply_pause(rs, False, now=FRI), 0)                          # already running
+
+    def test_resuming_skips_what_fell_in_the_pause(self):
+        r = self.reminder(paused=True, next_fire=FRI)
+        ntfy.apply_pause([r], False, now=TUE + 3600)
+        self.assertEqual(r["next_fire"], ts(2026, 10, 14, 9))   # Wed 09:00, not a stale Tuesday
+
+    def test_resuming_a_one_off_leaves_its_time_alone(self):
+        r = self.reminder(recurring=False, interval_type=None, interval_value=None, paused=True)
+        ntfy.apply_pause([r], False, now=TUE)
+        self.assertEqual(r["next_fire"], FRI)                   # overdue: goes out on the next cycle
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -76,6 +76,12 @@ a = s.post(BASE + "/api/reminders", json={"message": "ci one-off", "next_fire": 
 b = s.post(BASE + "/api/reminders", json={"message": "ci weekday", "next_fire": now - 60, "recurring": True,
                                           "interval_type": "days", "interval_value": 1, "days": [today], "tz": "Europe/Dublin"})
 check("create reminders", a.status_code == 201 and b.status_code == 201, (a.text, b.text))
+# a third, due too, but paused: it must be kept and never sent
+c = s.post(BASE + "/api/reminders", json={"message": "ci paused", "next_fire": now - 60, "recurring": True,
+                                          "interval_type": "days", "interval_value": 1})
+pz = s.post(BASE + "/api/reminders/pause", json={"paused": True, "ids": [c.json()["id"]]})
+check("pause a reminder", c.status_code == 201 and pz.status_code == 200 and pz.json().get("changed") == 1, (c.text, pz.text))
+check("bad pause request rejected with 400", s.post(BASE + "/api/reminders/pause", json={"paused": "yes"}).status_code == 400)
 check("filtered reminder kept its first fire (today is allowed)", b.json()["next_fire"] == now - 60, b.text)
 bad = s.post(BASE + "/api/reminders", json={"message": "x", "next_fire": now, "recurring": True,
                                             "interval_type": "days", "interval_value": 1, "days": [9]})
@@ -91,6 +97,8 @@ time.sleep(70)   # > two dispatch cycles: a second worker double-sending would s
 check("no duplicate sends (single dispatcher elected)", len(got) == 2, got)
 rs = {x["message"]: x for x in s.get(BASE + "/api/reminders").json()}
 check("one-off reminder removed after firing", "ci one-off" not in rs)
+check("paused reminder was kept, still paused, and rolled past now",
+      rs.get("ci paused", {}).get("paused") is True and rs["ci paused"]["next_fire"] > now, rs.get("ci paused"))
 nf = rs.get("ci weekday", {}).get("next_fire", 0)
 check("weekday reminder rolled to next allowed day (~7 days)", now + 6 * 86400 < nf < now + 8 * 86400 + 3600, nf - now)
 

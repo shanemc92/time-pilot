@@ -585,3 +585,19 @@ Includes everything in 2.7.0.
   split view and a phone layout - as WebP files in `docs/screenshots/`. The old
   demo animation (`docs/demo.webp`) and the two 3.0-era screenshots are removed
   until the animation is re-recorded.
+
+## Pausing scheduled reminders
+
+- **FEATURE:** Scheduled ntfy reminders can be paused and resumed, one at a
+  time (a pause button on each) or all together (**Pause all…** above the
+  list), until a date you pick or until you resume them. They stay in the list,
+  marked as paused, and send nothing. Handy for annual leave: nothing to delete
+  and re-create. A repeating reminder keeps its rhythm while paused and comes
+  back at its next regular time instead of firing late for the days it missed;
+  a pause with an end date lifts itself, including an occurrence that falls
+  exactly at that moment. A paused one-off whose time has passed is sent when you resume it.
+- **FEATURE:** New `POST /api/reminders/pause` (`paused`, optional `until` and
+  `ids`) does it in one write; `paused` and `paused_until` are part of the
+  reminder record, its validation (`sanitize.clean_reminder`) and the
+  export/import, and editing a reminder leaves its pause alone. The dispatcher
+  skips the database write for a paused one-off, so a long pause costs nothing.

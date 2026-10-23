@@ -300,6 +300,11 @@ section[id^="view-"]{animation:rise .35s cubic-bezier(.2,.7,.2,1)}
 .remItem .rActs{display:flex;gap:4px;flex:none}
 .remItem .rActs button{padding:3px 8px;font-size:11px}
 .rDue{color:var(--danger);font-weight:600}
+.rPaused{color:var(--accent);font-weight:650}
+.remItem.paused .rMsg,.remItem.paused .rMeta span:not(.rPaused){opacity:.55}
+.remBulk{margin-left:auto;display:flex;gap:6px}
+.remBulk button{padding:3px 9px;font-size:11px;text-transform:none;letter-spacing:0}
+.pzOpt{display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:8px}
 .warnBox{background:color-mix(in srgb,var(--danger) 12%,transparent);border:1px solid var(--danger);border-radius:12px;padding:9px 12px;color:var(--text)}
 
 .tagInputRow{display:flex;gap:8px;align-items:center}
@@ -899,7 +904,7 @@ main.split .setMenuItem{width:auto;flex:none;white-space:nowrap;margin:0}
           <span class="small" id="remStatus"></span></div>
       </div>
       <div class="panel">
-        <h3>Scheduled <span id="remCount" class="muted"></span></h3>
+        <h3 style="display:flex;align-items:center;gap:8px"><span>Scheduled <span id="remCount" class="muted"></span></span><span id="remBulk" class="remBulk"></span></h3>
         <div id="remList"></div>
       </div>
     </div>
@@ -2530,22 +2535,32 @@ function renderRemList(){
   const box = $("#remList"), now = Date.now()/1000;
   box.innerHTML = "";
   $("#remCount").textContent = reminders.length ? `(${reminders.length})` : "";
+  const bulk = $("#remBulk");
+  bulk.innerHTML = (reminders.length ? `<button class="ghost small" data-bulk="pause">Pause all…</button>` : "")
+    + (reminders.some(r => r.paused) ? `<button class="ghost small" data-bulk="resume">Resume all</button>` : "");
+  bulk.onclick = e => {
+    const b = e.target.closest("[data-bulk]"); if(!b) return;
+    if(b.dataset.bulk === "resume") remPause(false, null, null); else remPauseModal(null, "all reminders");
+  };
   if(!reminders.length){
     box.innerHTML = `<span class="muted small">Nothing scheduled yet.</span>`; return;
   }
-  [...reminders].sort((a,b)=>a.next_fire-b.next_fire).forEach(r=>{
+  [...reminders].sort((a,b)=>!!a.paused-!!b.paused || a.next_fire-b.next_fire).forEach(r=>{
     const row = document.createElement("div");
-    row.className = "remItem" + (remEditing===r.id ? " editing" : "");
+    row.className = "remItem" + (remEditing===r.id ? " editing" : "") + (r.paused ? " paused" : "");
     const emoji = NTFY_TAG_EMOJI[r.tag] || "🔔";
     row.innerHTML = `<div class="rMain">
         <div class="rMsg">${emoji} ${esc(r.message)}</div>
         <div class="rMeta">
-          <span class="${r.next_fire<=now?"rDue":""}">${esc(fmtWhen(r.next_fire))}</span>
+          ${r.paused ? `<span class="rPaused">⏸ ${r.paused_until ? "Paused until " + esc(fmtUntil(r.paused_until)) : "Paused"}</span>`
+            : `<span class="${r.next_fire<=now?"rDue":""}">${esc(fmtWhen(r.next_fire))}</span>`}
           <span>P${esc(String(r.priority))} ${esc(PRIO_LABEL[r.priority]||"")}</span>
           ${r.recurring?`<span>🔁 ${esc(fmtInterval(r.interval_type, r.interval_value))}${r.days&&r.days.length?esc(" · "+fmtDays(r.days)):""}</span>`:"<span>one-off</span>"}
         </div></div>
-      <div class="rActs"><button data-edit class="ghost small" title="Edit">&#9998;</button>
+      <div class="rActs"><button data-pause class="ghost small" title="${r.paused ? "Resume" : "Pause"}" aria-label="${r.paused ? "Resume" : "Pause"} this reminder">${r.paused ? "▶" : "⏸"}</button>
+        <button data-edit class="ghost small" title="Edit">&#9998;</button>
         <button data-del class="ghost small danger" title="Delete">✕</button></div>`;
+    row.querySelector("[data-pause]").onclick = () => r.paused ? remPause(false, null, [r.id]) : remPauseModal([r.id], "this reminder");
     row.querySelector("[data-edit]").onclick = () => remLoadInto(r);
     row.querySelector("[data-del]").onclick = async () => {
       if(!confirm("Delete this reminder?")) return;
@@ -2556,6 +2571,43 @@ function renderRemList(){
     };
     box.appendChild(row);
   });
+}
+const fmtUntil = ts => new Date(ts*1000).toLocaleDateString(undefined, {weekday:"short", day:"numeric", month:"short"});
+// Pause or resume reminders (ids null = all of them), optionally until a time. One server call, so
+// "pause all" for annual leave is a single write.
+async function remPause(paused, until, ids){
+  let ok = false;
+  try {
+    const r = await fetch("/api/reminders/pause", {method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({paused, until: until || null, ids})});
+    const j = await r.json().catch(() => ({}));
+    if(r.ok){ ok = true; remStatus(paused ? "Paused ✓" : "Resumed ✓"); }
+    else remStatus(j.error || "Couldn't change that", true);
+  } catch(e){ remStatus("Couldn't change that", true); }
+  await loadReminders(); renderRemList();
+  return ok;
+}
+function remPauseModal(ids, what){
+  const day = n => isoOf(new Date(Date.now() + n*86400000));
+  openModal(`<h3>Pause ${esc(what)}</h3>
+    <p class="muted small" style="margin-bottom:14px">They stay in the list but send nothing. Repeating ones carry on at their next regular time once they are back on.</p>
+    <label class="pzOpt"><input type="radio" name="pz" value="hand" checked> Until I turn ${ids ? "it" : "them"} back on</label>
+    <label class="pzOpt"><input type="radio" name="pz" value="date"> Until <input type="date" id="pzDate" min="${day(1)}" value="${day(7)}"></label>
+    <div class="small muted" style="margin:-2px 0 4px 24px">Back on from the start of that day.</div>
+    <div id="pzErr" class="small errText" style="min-height:1.2em"></div>
+    <div class="mActions"><button id="mCancel">Cancel</button><button class="primary" id="pzGo">⏸ Pause</button></div>`);
+  $("#pzDate").oninput = () => { document.querySelector("input[name=pz][value=date]").checked = true; };
+  $("#mCancel").onclick = closeModal;
+  $("#pzGo").onclick = async () => {
+    let until = null;
+    if(document.querySelector("input[name=pz]:checked").value === "date"){
+      const v = $("#pzDate").value;
+      until = v ? Math.floor(new Date(v + "T00:00").getTime() / 1000) : NaN;
+      if(!(until > Date.now()/1000)){ $("#pzErr").textContent = "Pick a date after today."; return; }
+    }
+    closeModal();
+    await remPause(true, until, ids);
+  };
 }
 function remStatus(msg, isErr){
   const el = $("#remStatus");

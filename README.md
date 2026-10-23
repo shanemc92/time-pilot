@@ -99,8 +99,9 @@ to plain translucent surfaces with no blur; everything still works.
   with everything else.
 - **Notifications (ntfy)** - schedule one-off or recurring push reminders to
   your phone via [ntfy](https://ntfy.sh) (ntfy.sh or your own server). Sent
-  by the server, so they arrive whether or not the app is open. Task and
-  meeting pop-ups can optionally push to ntfy too.
+  by the server, so they arrive whether or not the app is open. Pause any of
+  them - or all of them, for annual leave - without losing the schedule. Task
+  and meeting pop-ups can optionally push to ntfy too.
 - **Encrypted at rest** - every user's data is AES-256-GCM encrypted before
   it touches the database (see "Security notes" below).
 - **Backup/restore** - export your account's data as a single JSON file
@@ -376,6 +377,13 @@ worked out in the timezone of the browser that saved the reminder, not the
 server's, so a reminder at 00:30 doesn't slip to the wrong day when the server
 runs in UTC. Weekly and monthly repeats don't show the buttons: they already
 land on one fixed day.
+
+Going on annual leave? Every reminder has a **pause** button, and **Pause
+all…** at the top of the list pauses everything at once. Pause until a date you
+pick (the reminders are back on from the start of that day) or until you press
+resume. Paused reminders stay in the list and send nothing; a repeating one
+carries on at its next regular time rather than catching up on the days it
+missed. (A paused one-off that is overdue goes out as soon as you resume it.)
 
 The **"Push task & meeting reminders to ntfy"** toggle mirrors the existing
 slotted-task and meeting pop-ups out to ntfy as they fire. Those are driven

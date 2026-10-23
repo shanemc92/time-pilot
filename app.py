@@ -533,6 +533,9 @@ def create_app():
             "interval_value": ivalue,
             "days": days,
             "tz": tz,
+            # Pausing goes through /api/reminders/pause; editing leaves it as it was.
+            "paused": bool(base.get("paused")),
+            "paused_until": base.get("paused_until") if base.get("paused") else None,
             "created": base.get("created") or int(time.time()),
         }, None
 
@@ -578,6 +581,35 @@ def create_app():
                 save_reminders(current_user.id, rs)
                 return jsonify(r)
         return jsonify({"error": "Not found"}), 404
+
+    # Pause or resume reminders - one, several or all - and optionally until a
+    # time. One path for the single-row button and the "pause all" for annual
+    # leave, and one read-modify-write so they can't trample each other.
+    @app.route("/api/reminders/pause", methods=["POST"])
+    @login_required
+    @csrf.exempt
+    def pause_reminders():
+        if not request.is_json:
+            return jsonify({"error": "Content-Type must be application/json"}), 415
+        body = _json_body() or {}
+        paused, until, ids = body.get("paused"), body.get("until"), body.get("ids")
+        if not isinstance(paused, bool):
+            return jsonify({"error": "paused must be true or false"}), 400
+        now = int(time.time())
+        if until is not None:
+            # Three years is far past any holiday and keeps a typo from parking a reminder for good.
+            if type(until) is not int or not paused or not now < until <= now + 3 * 366 * 86400:
+                return jsonify({"error": "until must be a future time, within three years, and only with paused"}), 400
+        if ids is not None and not (isinstance(ids, list) and len(ids) <= 200
+                                    and all(isinstance(x, str) and len(x) <= 64 for x in ids)):
+            return jsonify({"error": "ids must be a list of reminder ids"}), 400
+        rs = load_reminders(current_user.id)
+        changed = ntfy_mod.apply_pause(rs, paused, until, None if ids is None else set(ids), now)
+        if changed:
+            save_reminders(current_user.id, rs)
+            logger.info("user %s (%s) %s %d reminder(s)", current_user.id, current_user.username,
+                        "paused" if paused else "resumed", changed)
+        return jsonify({"ok": True, "changed": changed})
 
     @app.route("/api/reminders/<rid>", methods=["DELETE"])
     @login_required

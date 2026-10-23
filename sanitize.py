@@ -354,10 +354,13 @@ def clean_reminder(r):
         tz = _str(r.get("tz"), "", 64)
         tz = tz if _TZ.match(tz) else None
     tag = _str(r.get("tag"), "").strip()[:60]
+    paused = r.get("paused") is True
     return {"id": _key(r.get("id")) or uuid.uuid4().hex, "message": msg, "priority": priority,
             "tag": tag if _TAG.match(tag) else "alarm_clock", "next_fire": next_fire,
             "recurring": recurring, "interval_type": itype, "interval_value": ivalue,
             "days": days, "tz": tz,
+            # Paused until a time (unix seconds), or until resumed by hand when None.
+            "paused": paused, "paused_until": _int(r.get("paused_until"), None, 1, 10 ** 11) if paused else None,
             "created": _int(r.get("created"), 0, 0, 10 ** 11)}
 
 

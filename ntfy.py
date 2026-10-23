@@ -168,6 +168,56 @@ def advance_time(ts, interval_type, interval_value, days=None, tz=None):
     return nxt if allowed is None else allowed
 
 
+def _roll_forward(r, now, floor=None):
+    """Move a repeating reminder on without sending anything: to its first
+    occurrence after `now`, or - given a `floor` - to its first occurrence at
+    or after that time (which may already be due, and then fires as normal)."""
+    step = (r["interval_type"], int(r["interval_value"]), r.get("days"), zone(r.get("tz")))
+    nxt = int(r["next_fire"])
+    while (nxt < floor) if floor is not None else (nxt <= now):
+        nxt = advance_time(nxt, *step)
+    r["next_fire"] = nxt
+
+
+def _repeats(r):
+    return bool(r.get("recurring") and r.get("interval_type") and r.get("interval_value"))
+
+
+def _resume_due(r, now):
+    """A pause with an end date whose date has arrived."""
+    return bool(r.get("paused")) and bool(r.get("paused_until")) and now >= int(r["paused_until"])
+
+
+def needs_dispatch(r, now):
+    """True if this reminder needs the dispatcher to do something this cycle.
+    A paused reminder never sends, but a repeating one still has to be rolled
+    past the occurrences it skips, and a pause that has run out has to end."""
+    if r.get("paused"):
+        return _resume_due(r, now) or (_repeats(r) and int(r.get("next_fire", 0)) <= now)
+    return int(r.get("next_fire", 0)) <= now
+
+
+def apply_pause(reminders, paused, until=None, ids=None, now=None):
+    """Pause or resume reminders (all of them when `ids` is None). Returns how
+    many changed. Resuming a repeating reminder skips any occurrence that fell
+    while it was paused instead of firing one late."""
+    now = int(time.time()) if now is None else now
+    changed = 0
+    for r in reminders:
+        if ids is not None and r.get("id") not in ids:
+            continue
+        if paused:
+            r["paused"], r["paused_until"] = True, until
+        else:
+            if not r.get("paused"):
+                continue
+            r["paused"], r["paused_until"] = False, None
+            if _repeats(r) and int(r.get("next_fire", 0)) <= now:
+                _roll_forward(r, now)
+        changed += 1
+    return changed
+
+
 def dispatch_for_user(settings, reminders, now=None):
     """Fire everything due. Returns (kept_reminders, sent_count).
 
@@ -176,6 +226,18 @@ def dispatch_for_user(settings, reminders, now=None):
     now = int(time.time()) if now is None else now
     kept, sent = [], 0
     for r in reminders:
+        if _resume_due(r, now):
+            until = int(r["paused_until"])
+            r["paused"], r["paused_until"] = False, None
+            if _repeats(r):
+                _roll_forward(r, now, floor=until)   # nothing from inside the pause fires
+        if r.get("paused"):
+            # Paused: never sent. A repeating one keeps its rhythm, so it comes
+            # back on its next real occurrence rather than with a stale fire.
+            if _repeats(r) and int(r.get("next_fire", 0)) <= now:
+                _roll_forward(r, now)
+            kept.append(r)
+            continue
         if int(r.get("next_fire", 0)) > now:
             kept.append(r)
             continue
@@ -187,14 +249,12 @@ def dispatch_for_user(settings, reminders, now=None):
             sent += 1
         else:
             logger.warning("ntfy send failed for reminder %s: %s", r.get("id"), reason)
-        if r.get("recurring") and r.get("interval_type") and r.get("interval_value"):
-            step = (r["interval_type"], int(r["interval_value"]), r.get("days"), zone(r.get("tz")))
-            nxt = advance_time(int(r["next_fire"]), *step)
+        if _repeats(r):
             # Catch up past any occurrences missed while the app was down,
             # rather than firing one notification per missed occurrence.
-            while nxt <= now:
-                nxt = advance_time(nxt, *step)
-            r["next_fire"] = nxt
+            step = (r["interval_type"], int(r["interval_value"]), r.get("days"), zone(r.get("tz")))
+            r["next_fire"] = advance_time(int(r["next_fire"]), *step)
+            _roll_forward(r, now)
             kept.append(r)
         # one-time reminders are simply not kept
     return kept, sent
@@ -262,7 +322,7 @@ def start_dispatcher(app, db, load_settings, load_reminders, save_reminders, lis
                         if not (settings.get("ntfyTopic") or "").strip():
                             continue
                         rs = load_reminders(uid)
-                        if not any(int(r.get("next_fire", 0)) <= now for r in rs):
+                        if not any(needs_dispatch(r, now) for r in rs):
                             continue   # nothing due - skip the write entirely
                         kept, sent = dispatch_for_user(settings, rs)
                         save_reminders(uid, kept)
