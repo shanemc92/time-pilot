@@ -567,15 +567,8 @@ Includes everything in 2.7.0.
 - **FEATURE:** On small screens the timer bar is a single compact row (timer,
   task, Stop, sign out) with the quick timers in a swipeable row beneath it,
   instead of three stacked rows.
-- **BUGFIX:** The demo data's stand-ups and meetings are marked as already
-  imported, so opening a day on the Export tab no longer adds each one a second
-  time.
-- **FEATURE:** The README has a screenshot gallery - every tab, the themes,
-  split view and a phone layout - as WebP files in `docs/screenshots/`. The old
-  demo animation (`docs/demo.webp`) and the two 3.0-era screenshots are removed
-  until the animation is re-recorded.
 
-## Bloom theme
+## 3.1.1 - Bloom and Cobalt themes
 
 - **FEATURE:** A sixth theme, **Bloom**: a plain deep-plum background with the
   colour in the pink accent, the progress rings and the charts, rather than in
@@ -585,3 +578,10 @@ Includes everything in 2.7.0.
 - **FEATURE:** A seventh theme, **Cobalt**: a dark theme on a deep cobalt-blue
   background with a bright azure accent. Same 2.x fallback as above. The README
   gallery now shows all seven themes.
+- **BUGFIX:** The demo data's stand-ups and meetings are marked as already
+  imported, so opening a day on the Export tab no longer adds each one a second
+  time.
+- **FEATURE:** The README has a screenshot gallery - every tab, the themes,
+  split view and a phone layout - as WebP files in `docs/screenshots/`. The old
+  demo animation (`docs/demo.webp`) and the two 3.0-era screenshots are removed
+  until the animation is re-recorded.
