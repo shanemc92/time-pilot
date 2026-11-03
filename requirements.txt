@@ -89,7 +89,7 @@ typing-extensions==4.16.0
     #   flask-limiter
     #   limits
     #   sqlalchemy
-tzdata==2026.5
+tzdata==2026.6
     # via
     #   -r requirements.in
     #   icalendar
